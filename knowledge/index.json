@@ -3336,6 +3336,50 @@
   ]
  },
  {
+  "path": "games/project-zomboid/b42-creatures-beyond-zombies-animals-npcs-mannequins-thumpables.md",
+  "kind": "game",
+  "title": "Creatures beyond zombies and animals: friendly NPCs, mannequins, thumpable pseudo-creatures, multi-part bosses and hybrids",
+  "game": "Project Zomboid",
+  "games_also": [],
+  "game_version": "Build 42.21.0 (Steam, Windows 10)",
+  "platform": "windows",
+  "engine": "java",
+  "route": "loader-api",
+  "tools": [
+   "javap (JDK)",
+   "SurvivorSwap API",
+   "MannequinScript blocks",
+   "IsoThumpable",
+   "Bullet physics (btBullet)"
+  ],
+  "anti_cheat": "none",
+  "status": "working",
+  "agents": [
+   "Devin (SWE-2 Medium)"
+  ],
+  "humans": [
+   "Alistair-Afton"
+  ],
+  "date": "2026-10-12",
+  "links": [
+   "https://pzwiki.net/wiki/Lua_(API)"
+  ],
+  "tags": [
+   "b42",
+   "creatures",
+   "npc",
+   "follower",
+   "companion",
+   "mannequin",
+   "thumpable",
+   "boss",
+   "hybrid",
+   "ragdoll",
+   "survivor",
+   "pseudo-creature"
+  ]
+ },
+ {
   "path": "games/project-zomboid/b42-custom-monsters-dressed-zombie-route.md",
   "kind": "game",
   "title": "Custom humanoid monsters as dressed zombies: the Cry of Fear NPC mod anatomy (Build 42)",
@@ -3714,6 +3758,50 @@
    "mannequin",
    "timedaction",
    "data-oriented"
+  ]
+ },
+ {
+  "path": "games/project-zomboid/b42-weapons-ballistics-effects-vehicles-feedback.md",
+  "kind": "game",
+  "title": "Weapons, real ballistics, damage pipeline, effects and vehicle porting: the combat-output layer of Build 42",
+  "game": "Project Zomboid",
+  "games_also": [],
+  "game_version": "Build 42.21.0 (Steam, Windows 10); javap-verified",
+  "platform": "windows",
+  "engine": "java",
+  "route": "loader-api",
+  "tools": [
+   "javap (JDK)",
+   "BallisticsController/Bullet (btBullet)",
+   "WorldSoundManager",
+   "ModelManager/ModelInstance",
+   "media/effects param files"
+  ],
+  "anti_cheat": "none",
+  "status": "working",
+  "agents": [
+   "Devin (SWE-2 Medium)"
+  ],
+  "humans": [
+   "Alistair-Afton"
+  ],
+  "date": "2026-10-12",
+  "links": [
+   "https://pzwiki.net/wiki/Item_script_parameters"
+  ],
+  "tags": [
+   "b42",
+   "weapons",
+   "ballistics",
+   "damage",
+   "effects",
+   "tracers",
+   "vehicles",
+   "feedback",
+   "worldsound",
+   "attachments",
+   "dismember",
+   "explosions"
   ]
  },
  {
