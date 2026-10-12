@@ -3434,6 +3434,55 @@
   ]
  },
  {
+  "path": "games/project-zomboid/b42-presentation-edge-cases-animscript-shaders-tiles-radio-media.md",
+  "kind": "game",
+  "title": "Build 42 presentation edge cases: animscript combat XML, shaders, spriteModels, seating, radio/TV, recorded media, music, fonts",
+  "game": "Project Zomboid",
+  "games_also": [],
+  "game_version": "Build 42.21.0 (Steam, Windows 10); verified against install media/ tree",
+  "platform": "windows",
+  "engine": "java",
+  "route": "loader-api",
+  "tools": [
+   "Project Zomboid Lua (Kahlua) mod API",
+   "media/ text formats"
+  ],
+  "anti_cheat": "none",
+  "status": "working",
+  "agents": [
+   "Devin (SWE-2 Medium)"
+  ],
+  "humans": [
+   "Alistair-Afton"
+  ],
+  "date": "2026-10-12",
+  "links": [
+   "https://pzwiki.net/wiki/Animation",
+   "https://pzwiki.net/wiki/Recorded_media"
+  ],
+  "tags": [
+   "b42",
+   "animscript",
+   "actiongroups",
+   "animset-root",
+   "shaders",
+   "glsl",
+   "spritemodel",
+   "seating",
+   "cutaways",
+   "radio",
+   "recorded-media",
+   "tv",
+   "music",
+   "fonts",
+   "effects",
+   "tracers",
+   "gibs",
+   "voicestyles",
+   "presentation"
+  ]
+ },
+ {
   "path": "games/project-zomboid/b42-script-system-items-recipes-entities-vehicles.md",
   "kind": "game",
   "title": "Build 42 script system census: items, craftRecipes, entities, vehicles, traits, fluids - every block type",
@@ -3477,6 +3526,52 @@
    "mannequin",
    "timedaction",
    "data-oriented"
+  ]
+ },
+ {
+  "path": "games/project-zomboid/b42-world-simulation-loot-stories-metazones-worldgen.md",
+  "kind": "game",
+  "title": "Build 42 world simulation: loot distributions, random stories, metazones, WorldGen, basements, climate and meta events",
+  "game": "Project Zomboid",
+  "games_also": [],
+  "game_version": "Build 42.21.0 (Steam, Windows 10); verified against media/lua/server + jar class census",
+  "platform": "windows",
+  "engine": "java",
+  "route": "loader-api",
+  "tools": [
+   "Project Zomboid Lua (Kahlua) mod API",
+   "javap / ZomboidDecompiler for the zombie.* packages"
+  ],
+  "anti_cheat": "none (server-side simulation modding)",
+  "status": "working",
+  "agents": [
+   "Devin (SWE-2 Medium)"
+  ],
+  "humans": [
+   "Alistair-Afton"
+  ],
+  "date": "2026-10-12",
+  "links": [
+   "https://pzwiki.net/wiki/ProceduralDistributions",
+   "https://pzwiki.net/wiki/Distributions"
+  ],
+  "tags": [
+   "b42",
+   "loot",
+   "distributions",
+   "proceduraldistributions",
+   "world-stories",
+   "metazones",
+   "metagrid",
+   "zones",
+   "worldgen",
+   "basements",
+   "climate",
+   "weather",
+   "meta-events",
+   "helicopter",
+   "ai-director",
+   "java-internals"
   ]
  },
  {
