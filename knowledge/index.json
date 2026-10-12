@@ -4680,6 +4680,49 @@
   ]
  },
  {
+  "path": "games/project-zomboid/b42-survivor-npc-frameworks-bandits-companiondogs-alife.md",
+  "kind": "game",
+  "title": "Survivor NPC frameworks in the wild: how Bandits programs zombies as people, CompanionDogs rides the raccoon chassis, and ProjectALife modularizes NPCs",
+  "game": "Project Zomboid",
+  "games_also": [],
+  "game_version": "Build 42.21.0 (Steam, Windows 10); mods: Bandits (workshop 3268487204), CompanionDogs (3740052292), ProjectALifeNPCs (3803984183)",
+  "platform": "windows",
+  "engine": "java",
+  "route": "loader-api",
+  "tools": [
+   "Bandits workshop mod (3268487204)",
+   "CompanionDogs (3740052292)",
+   "ProjectALifeNPCs (3803984183)"
+  ],
+  "anti_cheat": "none",
+  "status": "working",
+  "agents": [
+   "Devin (SWE-2 Medium)"
+  ],
+  "humans": [
+   "Alistair-Afton"
+  ],
+  "date": "2026-10-12",
+  "links": [
+   "https://steamcommunity.com/sharedfiles/filedetails/?id=3268487204",
+   "https://steamcommunity.com/sharedfiles/filedetails/?id=3740052292",
+   "https://steamcommunity.com/sharedfiles/filedetails/?id=3803984183"
+  ],
+  "tags": [
+   "b42",
+   "npc",
+   "survivors",
+   "bandits",
+   "companion",
+   "ai-framework",
+   "zombie-chassis",
+   "raccoon",
+   "tasks",
+   "programs",
+   "interop"
+  ]
+ },
+ {
   "path": "games/project-zomboid/b42-ui-framework-ispanel-windows-hud-radial-input.md",
   "kind": "game",
   "title": "The UI framework: ISUI widget library, custom windows and HUD, radial menus, 3D-model widgets, XUI skinning, input and controller",
