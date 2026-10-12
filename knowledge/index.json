@@ -3291,6 +3291,195 @@
   ]
  },
  {
+  "path": "games/project-zomboid/b42-custom-monsters-dressed-zombie-route.md",
+  "kind": "game",
+  "title": "Custom humanoid monsters as dressed zombies: the Cry of Fear NPC mod anatomy (Build 42)",
+  "game": "Project Zomboid",
+  "games_also": [
+   "Cry of Fear"
+  ],
+  "game_version": "Project Zomboid 42.21.0 (Steam, Windows 10); mod version 0.68.25, modversion 42.20+, Workshop item 3813406470",
+  "platform": "windows",
+  "engine": "java",
+  "route": "loader-api",
+  "tools": [
+   "Project Zomboid Lua (Kahlua) mod API",
+   "Steam Workshop (for source study)"
+  ],
+  "anti_cheat": "none (single-player focus; mod has partial MP support via the normal Lua networking API)",
+  "status": "working",
+  "agents": [
+   "Devin (SWE-2 Medium)"
+  ],
+  "humans": [
+   "Alistair-Afton"
+  ],
+  "date": "2026-10-12",
+  "links": [
+   "https://steamcommunity.com/sharedfiles/filedetails/?id=3813406470"
+  ],
+  "tags": [
+   "b42",
+   "zombies",
+   "custom-monster",
+   "npc",
+   "clothing",
+   "bodylocation",
+   "animsets",
+   "animnode",
+   "animation-variables",
+   "skinned-mesh",
+   "spawning",
+   "persistent-outfit",
+   "multiplayer",
+   "case-study"
+  ]
+ },
+ {
+  "path": "games/project-zomboid/b42-lua-runtime-events-timedactions-ui-outfits-spawns.md",
+  "kind": "game",
+  "title": "Build 42 Lua runtime in practice: events, timed actions, context menus, UI, ModOptions, outfits and spawn tables",
+  "game": "Project Zomboid",
+  "games_also": [],
+  "game_version": "Build 42.21.0 (Steam, Windows 10); all paths/APIs verified in the install media/lua and two live mods",
+  "platform": "windows",
+  "engine": "java",
+  "route": "loader-api",
+  "tools": [
+   "Project Zomboid Lua (Kahlua) mod API",
+   "PZ-Umbrella EmmyLua stubs",
+   "PZAPI.ModOptions (vanilla mod-options UI)"
+  ],
+  "anti_cheat": "none (single-player; hosted servers run the same Lua)",
+  "status": "working",
+  "agents": [
+   "Devin (SWE-2 Medium)"
+  ],
+  "humans": [
+   "Alistair-Afton"
+  ],
+  "date": "2026-10-12",
+  "links": [
+   "https://pzwiki.net/wiki/Lua_(API)",
+   "https://pzwiki.net/wiki/Lua_event",
+   "https://github.com/PZ-Umbrella/Umbrella"
+  ],
+  "tags": [
+   "b42",
+   "lua",
+   "events",
+   "timed-actions",
+   "context-menu",
+   "ui",
+   "pzapi",
+   "modoptions",
+   "outfits",
+   "spawn-tables",
+   "translations",
+   "debug",
+   "networking"
+  ]
+ },
+ {
+  "path": "games/project-zomboid/b42-modding-anatomy-mod-structure-lua-assets-workshop.md",
+  "kind": "game",
+  "title": "Build 42 modding anatomy: mod folders, media assets, Lua, scripts, tooling and Workshop publishing",
+  "game": "Project Zomboid",
+  "games_also": [],
+  "game_version": "Build 42.21.0 (Steam, Windows 10); structure verified against the install and two live mods (Workshop 3813406470, a local animal mod)",
+  "platform": "windows",
+  "engine": "java",
+  "route": "loader-api",
+  "tools": [
+   "Project Zomboid Lua (Kahlua) mod API",
+   "PZ-Umbrella EmmyLua stubs",
+   "demiurgeQuantified/ZomboidDecompiler (Vineflower)",
+   "javap",
+   "TileZed/WorldEd community forks",
+   "Blender + Paddlefruit rig / DirectX X importer"
+  ],
+  "anti_cheat": "none. Single-player is unprotected; no client patching exists or is needed - mods are Lua + data loaded by the game itself. Hosted dedicated servers run the same mod set, so stay out of servers you do not control.",
+  "status": "working",
+  "agents": [
+   "Devin (SWE-2 Medium)"
+  ],
+  "humans": [
+   "Alistair-Afton"
+  ],
+  "date": "2026-10-12",
+  "links": [
+   "https://pzwiki.net/wiki/Modding",
+   "https://pzwiki.net/wiki/Mod_structure",
+   "https://github.com/PZ-Umbrella/Umbrella",
+   "https://github.com/demiurgeQuantified/ZomboidDecompiler",
+   "https://www.projectzomboid.com/modding/"
+  ],
+  "tags": [
+   "b42",
+   "mod-structure",
+   "lua",
+   "kahlua",
+   "scripts",
+   "animsets",
+   "models",
+   "sounds",
+   "sandbox-options",
+   "translations",
+   "texturepacks",
+   "maps",
+   "multiplayer",
+   "workshop",
+   "tooling",
+   "orientation"
+  ]
+ },
+ {
+  "path": "games/project-zomboid/b42-script-system-items-recipes-entities-vehicles.md",
+  "kind": "game",
+  "title": "Build 42 script system census: items, craftRecipes, entities, vehicles, traits, fluids - every block type",
+  "game": "Project Zomboid",
+  "games_also": [],
+  "game_version": "Build 42.21.0 (Steam, Windows 10); block census counted on media/scripts of that install",
+  "platform": "windows",
+  "engine": "java",
+  "route": "loader-api",
+  "tools": [
+   "Project Zomboid script system (media/scripts *.txt)",
+   "PZwiki ScriptsDocs"
+  ],
+  "anti_cheat": "none (data modding; no client patching)",
+  "status": "working",
+  "agents": [
+   "Devin (SWE-2 Medium)"
+  ],
+  "humans": [
+   "Alistair-Afton"
+  ],
+  "date": "2026-10-12",
+  "links": [
+   "https://pzwiki.net/wiki/Scripts",
+   "https://pzwiki.net/wiki/CraftRecipe_(scripts)"
+  ],
+  "tags": [
+   "b42",
+   "scripts",
+   "items",
+   "recipes",
+   "craftrecipe",
+   "entities",
+   "vehicles",
+   "traits",
+   "professions",
+   "fluids",
+   "models",
+   "sounds",
+   "fixing",
+   "mannequin",
+   "timedaction",
+   "data-oriented"
+  ]
+ },
+ {
   "path": "games/project-zomboid/cdda-enemy-pack-ants-custom-hostile-animals-a-breeding-colon.md",
   "kind": "game",
   "title": "CDDA Enemy Pack: Ants - custom hostile animals, a breeding colony and a custom nest tile in Build 42",
