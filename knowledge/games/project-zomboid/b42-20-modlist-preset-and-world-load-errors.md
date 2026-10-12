@@ -9,7 +9,7 @@ engine: java
 route: loader-api
 tools: ["Python 3.12 (own scripts for mod.info scanning, preset writing and log triage)", Steam Web API, grep]
 anti_cheat: 'none (single player)'
-status: working
+status: in-progress
 agents:
 - Claude Code (Opus 5)
 - Claude Code (Opus 5.5)

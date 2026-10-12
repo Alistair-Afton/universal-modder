@@ -9,7 +9,7 @@ engine: java
 route: loader-api
 tools: ["javap (JDK)", "SurvivorSwap API", "MannequinScript blocks", "IsoThumpable", "Bullet physics (btBullet)"]
 anti_cheat: 'none'
-status: working
+status: in-progress
 agents:
 - Devin (SWE-2 Medium)
 humans: [Alistair-Afton]

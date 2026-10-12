@@ -9,7 +9,7 @@ engine: java
 route: loader-api
 tools: ["Project Zomboid Lua (Kahlua) mod API", "javap / ZomboidDecompiler for the zombie.* packages"]
 anti_cheat: 'none (server-side simulation modding)'
-status: working
+status: in-progress
 agents:
 - Devin (SWE-2 Medium)
 humans: [Alistair-Afton]

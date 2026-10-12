@@ -9,7 +9,7 @@ engine: java
 route: loader-api
 tools: ["Project Zomboid Lua (Kahlua) mod API"]
 anti_cheat: 'none'
-status: working
+status: in-progress
 agents:
 - Devin (SWE-2 Medium)
 humans: [Alistair-Afton]
@@ -52,7 +52,9 @@ and the function works from any mod Lua - the whole body/identity of a player is
   write `traits:clear()` + `traits:add("base:x")` as SurvivorSwap does.
 - Perks: `Perks.<Name>` enum values + `Perks.getMaxIndex()`/`Perks.fromIndex(i)` iteration +
   `PerkFactory.getPerk(perk)`. Levels via `playerObj:setPerkLevelDebug(perk, n)` and
-  `playerObj:levelUp(perk)`/`getPerkLevel`. **Custom skill**: `PerkFactory.addPerk` exists in the Java API
+  `playerObj:getPerkLevel`. **Custom skill**: `PerkFactory.AddPerk` exists in the Java API (10-int XP
+  curve + parent/passive variants) and `media/perks.txt` (`perk Name { parent, translation, passive,
+  xp1 ... xp10 }`, loaded by `CustomPerks`) is the data path - see the custom-skills note.
   (community mods added skills in B41 - verify the exact signature in Umbrella stubs / javap; the perk list
   is built early, so register at `OnGameBoot` before the char screen).
 - XP: `playerObj:getXp():AddXP(perk, amount)` (+ `getXPGlobal`, multipliers); `client/XpSystem` +
@@ -116,7 +118,7 @@ SGlobalObjectSystem/CGlobalObjectSystem pair instead of hacking IsoObjects.
 ## Build steps
 1. Play-as mod: extend `SurvivorSwap.Survivors` entries or call `applyCharacter` on `OnGameStart`.
 2. Challenge mod: `client/LastStand`-style table + `addChallenge` + thumbnail png + hooks.
-3. Custom skill: `PerkFactory.addPerk` at `OnGameBoot` (verify signature), translation `Perk_` keys, wire XP
+3. Custom skill: `PerkFactory.AddPerk` at `OnGameBoot` (verify signature), translation `Perk_` keys, wire XP
    gains through `getXp():AddXP`.
 4. World device: SGlobalObjectSystem pair; study `MapObjects/` + the rain-barrel/generator Lua.
 5. Explosion/setpiece: `IsoFireManager.explode` + timed via `ISTimer` (luaexamples).
@@ -125,7 +127,7 @@ SGlobalObjectSystem/CGlobalObjectSystem pair instead of hacking IsoObjects.
 - Challenges appear in the game-mode picker with their png; `console.txt` shows hook errors.
 - SurvivorSwap entries show under the debug Survivor Swap context menu immediately.
 - Perk changes reflect in the char screen/skills panel; `ISPerkLog` prints XP.
-- Not verified: `PerkFactory.addPerk` exact call shape on 42.21 (Java signature - check Umbrella/javap
+- Not verified: `PerkFactory.AddPerk` exact call shape on 42.21 (Java signature - check Umbrella/javap
   before building a skill mod); GlobalObjectSystem subclassing end-to-end.
 
 ## Gotchas
@@ -149,7 +151,7 @@ SGlobalObjectSystem/CGlobalObjectSystem pair instead of hacking IsoObjects.
   files (see presentation note).
 
 ## Open questions
-- Exact `PerkFactory.addPerk` contract on B42 (arguments, when perks serialize, MP sync).
+- Exact `PerkFactory.AddPerk` contract on B42 (arguments, when perks serialize, MP sync).
 - Whether `SurvivorSwap.Loadouts`/`Vehicles` have engine consumers beyond the debug menu.
 - GlobalObjectSystem: which lifecycle hooks are required vs optional (documented only by reading the rain
   barrel/generator Lua deeply).

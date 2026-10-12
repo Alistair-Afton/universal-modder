@@ -9,7 +9,7 @@ engine: java
 route: loader-api
 tools: ["javap (JDK)", "PZ-Umbrella stubs for signatures", "ZomboidDecompiler for internals"]
 anti_cheat: 'none'
-status: working
+status: in-progress
 agents:
 - Devin (SWE-2 Medium)
 humans: [Alistair-Afton]
@@ -43,7 +43,7 @@ Loader API, same as always - this is the index OF that API.
 - AI/senses: `spotted(player)` / `spottedNew` / `spottedOld`, `isTargetInCone`, `pathToCharacter`,
   `pathToLocationF`, `RespondToSound`, `isRespondingToPlayerSound`, `isMovingToPlayerSound`,
   `setTurnAlertedValues`, `addAggro`, `isLeadAggro`, `clearAggroList`, `setWalkType`,
-  `getZombieWalkTowardSpeed`, `setSpeedTypeFromWalkType`, `getShouldAttack` (the ~0.72-tile gate).
+  `getZombieWalkTowardSpeed`, `setSpeedTypeFromWalkType`.
 - State tricks: `setCrawler`/`isBecomeCrawler`/`setCanCrawlUnderVehicle`/`shouldGetUpFromCrawl`,
   `setFakeDead`/`isFakeDead`/`setForceFakeDead`/`setWasFakeDead`, `setKnockedDown`, `knockDown`,
   `setOnFloor`, `setCanWalk`, `setGodMod`, `setSitAgainstWall`, `setReanimatedForGrappleOnly`,
@@ -56,7 +56,7 @@ Loader API, same as always - this is the index OF that API.
 
 ### `zombie.characters.IsoPlayer` (IsoZombie's sibling, ~500)
 - Identity/visual: `getDescriptor`, `getHumanVisual`, `resetModel`, `getCharacterTraits`,
-  `setPerkLevelDebug`, `getXp`/`setXp`, `getPerkLevel`, `levelUp`, `getZombieKills`.
+  `setPerkLevelDebug`, `getXp`/`setXp`, `getPerkLevel`, `getZombieKills`.
 - Voice: `playerVoiceSound(name)` (plays VoiceMale/Female*), `transmitPlayerVoiceSound`,
   `stopPlayerVoiceSound`, `getVoiceType`/`setVoicePitch`, `playGainExperienceLevelSound`,
   `playBloodSplatterSound`.
@@ -66,7 +66,7 @@ Loader API, same as always - this is the index OF that API.
   `isOnlyPlayerAsleep`, `getSleepingPillsTaken`.
 - World interaction: `getCurrentSquare`, `isWearingNightVisionGoggles`/`setWearingNightVisionGoggles`,
   `addAttachedAnimal`/`getAttachedAnimals`/`checkAnimalAttachedToRope` (leash/lead system),
-  `isRandXp`, `getOnlineID`, `getPlayerInfoPanel`.
+  `isRandXp`, `getOnlineID`.
 - Bumps: `setBumpType`, `setBumpFall`, `setBumpFallType`, `setVariable("BumpDone")`,
   `clearVariable`, `reportEvent("wasBumped")` (the trip/knockdown sequence, see CDDA note).
 
@@ -75,12 +75,12 @@ Loader API, same as always - this is the index OF that API.
 `setIgnoreStaggerBack`, `getTimeThumping`, `setVariable`/`getVariable`/`clearVariable` (animation
 variables!), `getAdvancedAnimator`, `reportEvent`, `getModData`, `setX/setY/setZ` + `setLastX/Y`,
 `getCurrentSquare`, `getInventory`, `getPrimaryHandItem`/`setPrimaryHandItem`, `getSecondaryHandItem`,
-`Dressup`/`getWornItems`, `setInvisible`, `setGodMod`, `setCollision`, `pathToLocation`, `pathToCharacter`,
+`Dressup`/`getWornItems`, `setInvisible`, `setGodMod`, `pathToLocation`, `pathToCharacter`,
 `getSpeedMod`/`setVariable("animalSpeed")`, `clearFallDamage`, `isOnFloor`, `setDirectionAngle`,
-`getAngle`, `moveForward`/`faceThisObject`, `getZombieKills`, `setZombieKills`.
+`MoveForward`/`faceThisObject`, `getZombieKills`, `setZombieKills`.
 
 ### `zombie.characters.animals.IsoAnimal` (the creature chassis, ~250)
-`getBehavior` (`BaseAnimalBehavior`: `goAttack`, `fleeFromChr`, `isDoingBehavior`), `pathToCharacter`,
+`getBehavior` (`BaseAnimalBehavior`: `goAttack`, `forceFleeFromChr`, `isDoingBehavior`), `pathToCharacter`,
 `pathToLocation`, `pathToTrough`, `fleeTo`, `respondToSound`, `getLastSoundRespondedTo`,
 `changeStress`/`getStress`/`setDebugStress`/`updateStress`/`getStressTxt`, `isAlerted`/`setIsAlerted`,
 `setAnimalAttackingOnClient`, `isAnimalAttacking`, `hitConsequences`, `setHitReaction`,
@@ -108,7 +108,7 @@ variables!), `getAdvancedAnimator`, `reportEvent`, `getModData`, `setX/setY/setZ
 `splatBlood`/`haveBlood(Wall|Floor)`/`removeBlood`/`removeCorpse`, `removeGrime`,
 `GetR/G/BLightLevel` + `SetR/G/BLightLevel` (writeable lighting!), `interpolateLight`,
 `DoWallLightingNW/N/W`, `switchLight`, `removeGlassAttachments`, `removeUnderground`, `has(flag)`/
-`Is(flag)`-family (the 42.21 rename trap), `isInARoom`/`getBuilding`, `isVehicel`, `isFree`, `hasTypes`.
+`has(flag)`/`Is(flag)`-family (the `Is` name was removed in 42.21 - the rename trap), `isInARoom`/`getBuilding`, `isFree`, `hasTypes`.
 
 ### `zombie.iso.IsoCell` (loaded world, ~200)
 `getGridSquare(x,y,z)` (nil outside loaded area - THE fundamental constraint), `getZombieList`,
@@ -121,12 +121,13 @@ variables!), `getAdvancedAnimator`, `reportEvent`, `getModData`, `setX/setY/setZ
 ### `zombie.iso.IsoWorld` (the world, ~150)
 `getCell`, `getMetaGrid` (IsoMetaGrid - unloaded-safe zones), `getMetaChunk(FromTile)`,
 `registerZone`/`registerZoneNoOverlap`/`registerNavZones`/`registerVehiclesZone`/`registerMannequinZone`/
-`registerRoomTone`/`registerAnimalZone`/`registerSpawnOrigin`/`registerWaterZone`/`registerWaterFlow`/
+`registerRoomTone`/`registerSpawnOrigin`/`registerWaterZone`/`registerWaterFlow`/
+  (note: `registerAnimalZone` lives on `IsoMetaGrid`, not `IsoWorld`)/
 `removeZonesForLotDirectory`/`checkVehiclesZones`, `getWeather`/`setWeather`/`transmitWeather`,
 `getZombiesDisabled`, `getRandomizedZoneList`/`getRandomizedZoneStoryByName`,
 `getRandomizedBuildingList`, `getRandomizedVehicleStoryList`/`getRandomizedVehicleStoryByName`,
 `getRandomizedWorldBase` (world-story registries!), `getLuaSpawnCellX/Y`, `getSpawnRegion`,
-`setSpawnRegion`, `getWorldAge`/`getTimeOfDay`-style time accessors (see `getGameTime()` too).
+`setSpawnRegion`, `getWorldAgeDays`/`getTimeOfDay`-style time accessors (see `getGameTime()` too).
 
 ### `zombie.VirtualZombieManager` (population director)
 `createRealZombieNow(x,y,z)`/`createRealZombie`/`createRealZombieAlways` (variants),
@@ -179,8 +180,9 @@ overlays!), `getChildSprites`/`setChildSprites`, `sync`/`syncIsoObject(+Send/Rec
 `syncFluidContainer(Receive|Send)` (MP object sync), `getForwardMovementIsoDirection`.
 
 ## Verification
-- Every listed method name is copied verbatim from `javap -cp projectzomboid.jar <class>` output on
-  42.21.0 (Windows); the dumps live outside the repo. A name present here is Lua-callable.
+- Names come from `javap -cp projectzomboid.jar <class>` on 42.21.0 cross-checked against the
+  community javadocs; a handful of dump names turned out non-public or Lua-side (see inline notes).
+  When in doubt, re-run javap on your build - names drift between 42.x releases.
 - Spot-checked in-game in the referenced ports (createRealZombieNow, dressInPersistentOutfitID,
   addToReusable/isReused, registerAnimalZone, pathToCharacter/fleeTo/goAttack, hitConsequences,
   setVariable/reportEvent, getModData, isExplored) via COF/HLM/CDDA.
@@ -209,8 +211,10 @@ decompile with ZomboidDecompiler - describe findings in your own words, never sh
 5. **`getGridSquare` nil = unloaded** - combine with `getMetaGrid` zones for world-level work.
 6. **`setExplored(false)` on a container re-lootables it** - and similar "state flag" methods hide on most
    classes; grep the dump before assuming something's impossible.
-7. **Inner classes** (`BodyDamage$BodyDamage`, `IsoZombie$Aggro`, `BaseVehicle$engineStateTypes`) are
-   reachable but need the enclosing handle (`playerObj:getBodyDamage()` returns the inner instance).
+7. **Package-class name traps** - `zombie.characters.BodyDamage.BodyDamage` is a top-level class inside
+   a package also named `BodyDamage`, not an inner class; `playerObj:getBodyDamage()` returns it.
+   True inner classes (`IsoZombie$Aggro`, `BaseVehicle$engineStateTypes`) likewise come back through
+   accessor methods.
 8. **Method names drift between 42.x builds** - this sheet is 42.21.0-exact; re-run javap on upgrade.
 
 ## Open questions

@@ -9,7 +9,7 @@ engine: java
 route: loader-api
 tools: ["mod.info require= key", "shared Lua globals", "OnGameBoot/OnGameTimeLoaded ordering", "mod hooks"]
 anti_cheat: 'none'
-status: working
+status: in-progress
 agents:
 - Devin (SWE-2 Medium)
 humans: [Alistair-Afton]

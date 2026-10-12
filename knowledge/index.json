@@ -3729,7 +3729,7 @@
    "grep"
   ],
   "anti_cheat": "none (single player)",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Claude Code (Opus 5)",
    "Claude Code (Opus 5.5)"
@@ -3771,7 +3771,7 @@
    "zombie.savefile.* PlayerDB"
   ],
   "anti_cheat": "none",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -3813,7 +3813,7 @@
    "zombie.core.skinnedmodel.*"
   ],
   "anti_cheat": "none",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -3855,7 +3855,7 @@
    "media/sound"
   ],
   "anti_cheat": "none",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -3897,7 +3897,7 @@
    "SGlobalObjectSystem (rain barrels, generators)"
   ],
   "anti_cheat": "none",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -3940,7 +3940,7 @@
    "Project Zomboid Lua (Kahlua) mod API"
   ],
   "anti_cheat": "none",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -3987,7 +3987,7 @@
    "function-wrapping"
   ],
   "anti_cheat": "none",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -4031,7 +4031,7 @@
    "Bullet physics (btBullet)"
   ],
   "anti_cheat": "none",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -4074,7 +4074,7 @@
    "Steam Workshop (for source study)"
   ],
   "anti_cheat": "none (single-player focus; mod has partial MP support via the normal Lua networking API)",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -4082,9 +4082,7 @@
    "Alistair-Afton"
   ],
   "date": "2026-10-12",
-  "links": [
-   "https://steamcommunity.com/sharedfiles/filedetails/?id=3813406470"
-  ],
+  "links": [],
   "tags": [
    "b42",
    "zombies",
@@ -4120,7 +4118,7 @@
    "CharacterCreationProfession.lua"
   ],
   "anti_cheat": "none",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -4159,7 +4157,7 @@
    "zombie.entity.* package"
   ],
   "anti_cheat": "none",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -4202,7 +4200,7 @@
    "in-game WorldMap editor (media/lua/client/ISUI/Maps/Editor)"
   ],
   "anti_cheat": "none",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -4247,7 +4245,7 @@
    "ZomboidDecompiler for internals"
   ],
   "anti_cheat": "none",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -4296,7 +4294,7 @@
    "PZAPI.ModOptions (vanilla mod-options UI)"
   ],
   "anti_cheat": "none (single-player; hosted servers run the same Lua)",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -4342,7 +4340,7 @@
    "javap (JDK)"
   ],
   "anti_cheat": "none",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -4383,7 +4381,7 @@
    "mod hooks"
   ],
   "anti_cheat": "none",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -4423,7 +4421,7 @@
    "EmmyLua (Umbrella)"
   ],
   "anti_cheat": "none",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -4468,7 +4466,7 @@
    "Blender + Paddlefruit rig / DirectX X importer"
   ],
   "anti_cheat": "none. Single-player is unprotected; no client patching exists or is needed - mods are Lua + data loaded by the game itself. Hosted dedicated servers run the same mod set, so stay out of servers you do not control.",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -4516,7 +4514,7 @@
    "the b42-* note series in this KB"
   ],
   "anti_cheat": "none",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -4553,7 +4551,7 @@
    "dedicated server (Steam app 380870)"
   ],
   "anti_cheat": "none",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -4599,7 +4597,7 @@
    "fal (Meshy, ElevenLabs)"
   ],
   "anti_cheat": "none (single-player creature mods)",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -4607,9 +4605,7 @@
    "Alistair-Afton"
   ],
   "date": "2026-10-12",
-  "links": [
-   "https://steamcommunity.com/sharedfiles/filedetails/?id=3813406470"
-  ],
+  "links": [],
   "tags": [
    "b42",
    "creatures",
@@ -4641,7 +4637,7 @@
    "media/ text formats"
   ],
   "anti_cheat": "none",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -4690,7 +4686,7 @@
    "PZwiki ScriptsDocs"
   ],
   "anti_cheat": "none (data modding; no client patching)",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -4737,7 +4733,7 @@
    "ProjectALifeNPCs (3803984183)"
   ],
   "anti_cheat": "none",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -4781,7 +4777,7 @@
    "OnMouse/OnKey events"
   ],
   "anti_cheat": "none",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -4826,7 +4822,7 @@
    "media/effects param files"
   ],
   "anti_cheat": "none",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -4869,7 +4865,7 @@
    "media/lua/shared|client weather tables"
   ],
   "anti_cheat": "none",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],
@@ -4909,7 +4905,7 @@
    "javap / ZomboidDecompiler for the zombie.* packages"
   ],
   "anti_cheat": "none (server-side simulation modding)",
-  "status": "working",
+  "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
   ],

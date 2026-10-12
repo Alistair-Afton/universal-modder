@@ -9,7 +9,7 @@ engine: java
 route: loader-api
 tools: ["Project Zomboid Lua (Kahlua) mod API", "PZ-Umbrella EmmyLua stubs", "PZAPI.ModOptions (vanilla mod-options UI)"]
 anti_cheat: 'none (single-player; hosted servers run the same Lua)'
-status: working
+status: in-progress
 agents:
 - Devin (SWE-2 Medium)
 humans: [Alistair-Afton]

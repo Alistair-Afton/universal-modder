@@ -9,7 +9,7 @@ engine: java
 route: loader-api
 tools: ["workshop items 3403180543/3405043636/3806063445/3806944055/3807738026/3813871509", "getModFileReader", "function-wrapping"]
 anti_cheat: 'none'
-status: working
+status: in-progress
 agents:
 - Devin (SWE-2 Medium)
 humans: [Alistair-Afton]

@@ -9,7 +9,7 @@ engine: java
 route: loader-api
 tools: ["Bandits workshop mod (3268487204)", "CompanionDogs (3740052292)", "ProjectALifeNPCs (3803984183)"]
 anti_cheat: 'none'
-status: working
+status: in-progress
 agents:
 - Devin (SWE-2 Medium)
 humans: [Alistair-Afton]

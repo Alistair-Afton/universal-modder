@@ -9,13 +9,12 @@ engine: java
 route: loader-api
 tools: ["Project Zomboid Lua (Kahlua) mod API", "jassimp64 (assimp model loader in the game)", "Blender + DirectX X importer", "Crowbar/pymeshlab for source formats", "fal (Meshy, ElevenLabs)"]
 anti_cheat: 'none (single-player creature mods)'
-status: working
+status: in-progress
 agents:
 - Devin (SWE-2 Medium)
 humans: [Alistair-Afton]
 date: '2026-10-12'
-links:
-- "https://steamcommunity.com/sharedfiles/filedetails/?id=3813406470"
+links: []
 tags: [b42, creatures, monsters, cross-game-port, models, skinned-mesh, animations, animsets, ai, sounds, legal, houndeye, cry-of-fear]
 ---
 # Porting whole creatures from other games into Build 42: three proven routes
@@ -50,13 +49,15 @@ write the brain.
 
 ### Step 2 - get the body: three proven asset provenances
 **A. Original game assets (the Cry of Fear route).** CoF ships its monsters' *own* models/animations/sounds
-with the porters' rights cleared (the mod credits the CoF asset licenses - you must do the same or you can't
-publish). Layout: `models_X/<Monster>/` skinned meshes + `anims_X/<Monster>/` clips + atlas textures +
+(Svide's Workshop mod uses Cry of Fear's original assets; it states no licence, so it is
+distributed as-is - your own public release would need the rights holder's permission, or private-use
+only). Layout: `models_X/<Monster>/` skinned meshes + `anims_X/<Monster>/` clips + atlas textures +
 `sound/` wav banks. If the source game can export skinned meshes+anims to `.fbx`/`.glb`/`.x`, they load via
 the game's bundled **assimp (`jassimp64`)** - `model`/`animationsMesh` script blocks take those formats
 directly; no conversion to PZ's `.x` is required.
-**B. Converted source assets (the Half-Life route).** HLMonsters's houndeye: HL `.mdl` -> decompile/convert
-(Crowbar or similar to `.smd`/`.fbx`) -> skin to a PZ-compatible skeleton -> ship as text `.x`
+**B. Converted source assets (the Half-Life route).** HLMonsters's houndeye (**local-only, unpublished**):
+HL `.mdl` -> decompile/convert (Crowbar or similar to `.smd`/`.fbx`) -> skin to a PZ-compatible skeleton
+-> ship as text `.x`
 (`media/models_X/Skinned/Houndeye.x`) + `media/anims_X/houndeye/he_*.x` clips + `animationsMesh` entry
 (`animationDirectory = houndeye, animationPrefix = he_`). The AnimSet it uses is a *copy of the turkey's*
 (`media/AnimSets/turkey/` state folders with `he_` xml entries) - the animal chassis drives a ported
@@ -97,11 +98,12 @@ weighted scheduler + metazone habitats (`registerAnimalZone`) for animals. Sandb
 enable toggles + rarity enums (`sandbox-options.txt` + `Sandbox.json`).
 
 ### Legal hygiene (the part that decides if you can ship)
-- **Original assets**: only with a license - CoF's mod exists because the porters had permission. Don't
-  extract-and-ship commercial assets without it.
-- **Converted assets**: same rule - converting HL's `.mdl` doesn't change its copyright; HLMonsters is
-  distributed as the porter's own remake or under the source game's mod policy. If unsure, describe the
-  creature and generate your own assets (route C).
+- **Original assets**: only with an actual licence/permission - the CoF Workshop page states none,
+  so assets from another game's install stay **private** (as other cross-game ports in this KB do).
+  Don't extract-and-ship commercial assets without it.
+- **Converted assets**: same rule - converting HL's `.mdl` doesn't change its copyright. HLMonsters is
+  a **local-only mod** (not published anywhere) - fine for private play, not distributable as-is. If
+  unsure, describe the creature and generate your own assets (route C).
 - **Your own/generated**: cleanest - document provenance in the README.
 
 ## Build steps (a complete port, start to finish)

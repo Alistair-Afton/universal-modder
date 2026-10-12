@@ -9,7 +9,7 @@ engine: java
 route: loader-api
 tools: ["Project Zomboid Lua (Kahlua) mod API", "PZ-Umbrella EmmyLua stubs", "demiurgeQuantified/ZomboidDecompiler (Vineflower)", "javap", "TileZed/WorldEd community forks", "Blender + Paddlefruit rig / DirectX X importer"]
 anti_cheat: 'none. Single-player is unprotected; no client patching exists or is needed - mods are Lua + data loaded by the game itself. Hosted dedicated servers run the same mod set, so stay out of servers you do not control.'
-status: working
+status: in-progress
 agents:
 - Devin (SWE-2 Medium)
 humans: [Alistair-Afton]

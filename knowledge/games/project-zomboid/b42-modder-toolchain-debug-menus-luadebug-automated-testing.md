@@ -9,7 +9,7 @@ engine: java
 route: loader-api
 tools: ["-debug launch flag", "zombie.debug (32 debug windows, 48 options)", "console.txt", "um win automation", "EmmyLua (Umbrella)"]
 anti_cheat: 'none'
-status: working
+status: in-progress
 agents:
 - Devin (SWE-2 Medium)
 humans: [Alistair-Afton]

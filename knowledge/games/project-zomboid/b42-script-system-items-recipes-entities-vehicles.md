@@ -9,7 +9,7 @@ engine: java
 route: loader-api
 tools: ["Project Zomboid script system (media/scripts *.txt)", "PZwiki ScriptsDocs"]
 anti_cheat: 'none (data modding; no client patching)'
-status: working
+status: in-progress
 agents:
 - Devin (SWE-2 Medium)
 humans: [Alistair-Afton]

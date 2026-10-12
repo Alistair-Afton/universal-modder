@@ -9,7 +9,7 @@ engine: java
 route: loader-api
 tools: ["the b42-* note series in this KB"]
 anti_cheat: 'none'
-status: working
+status: in-progress
 agents:
 - Devin (SWE-2 Medium)
 humans: [Alistair-Afton]

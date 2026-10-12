@@ -9,7 +9,7 @@ engine: java
 route: loader-api
 tools: ["javap (JDK)", "PerkFactory.AddPerk", "CustomPerks.initLua", "media/scripts trait/profession blocks", "CharacterCreationProfession.lua"]
 anti_cheat: 'none'
-status: working
+status: in-progress
 agents:
 - Devin (SWE-2 Medium)
 humans: [Alistair-Afton]
@@ -35,27 +35,38 @@ Loader API - registration happens in Lua at `initLua` time.
 ```java
 static Perk AddPerk(Perk perk, String name,
                     int a1, int a2, int a3, int a4, int a5,
-                    int a6, int a7, int a8, int a9)
+                    int a6, int a7, int a8, int a9, int a10)
 static Perk AddPerk(Perk perk, String name,
-                    int a1..a9, boolean passive)
+                    int a1..a10, boolean passive)
 static Perk AddPerk(Perk perk, String name, Perk parent,
-                    int a1..a9)
+                    int a1..a10)
 static Perk AddPerk(Perk perk, String name, Perk parent,
-                    int a1..a9, boolean passive)
+                    int a1..a10, boolean passive)
 ```
 - `Perk` (an enum-like registry entry) + `getPerk`/`getPerkFromName`/`getPerkName` - the registry.
-- The 9 ints are the per-level XP curve thresholds (vanilla skills are level-1..10; the ints parametrize
-  the required XP per level - confirm exact ordering against `zombie.characters.skills` decompile, the
-  signature is verbatim).
+- The 10 ints are the per-level XP curve thresholds (levels 1-10 - confirm exact ordering against
+  `zombie.characters.skills` decompile; signature is verbatim).
 - `parent` overload = skill trees/derived perks (e.g. aiming -> marksman-style parents).
 - `passive` flag distinguishes passive perks.
 - **`CustomPerks`** (jar-verified): `CustomPerks.instance`, `init()`, `initLua()`, `Reset()` +
-  `CustomPerk` - the dedicated mod-registration path; call `AddPerk` from the Lua init path
-  (`CustomPerks.initLua` is the engine-side hook that runs your registration).
+  `CustomPerk` (`id`, `parent`, `passive`, `translation`, `xp` fields) - and crucially it **loads
+  `media/perks.txt`**, which is the supported data path:
+  ```
+  VERSION = 1,
+  perk ModSkill {
+      parent = Fitness,
+      translation = ModSkill,
+      passive = false,
+      xp1 = 1500, xp2 = 3000, ... xp10 = 90000,
+  }
+  ```
+  B42 mods ship this file (e.g. The Only Cure's `42/media/perks.txt`) - declare skills as data first,
+  fall back to `AddPerk` in `shared/` Lua only for computed registrations.
 
 ## Registering a custom skill - the recipe
-1. In `shared/` Lua: `PerkFactory.AddPerk(PerkFactory.Perks.<existing-similar-or-nil>, "ModSkill", ...)`
-   via the `CustomPerks.initLua` path; the returned `Perk` is your handle.
+1. Preferred: `media/perks.txt` with the block above (`CustomPerks` loads it) - no Lua needed.
+   Lua path: `PerkFactory.AddPerk(PerkFactory.Perks.<existing-similar-or-nil>, "ModSkill", ...)`
+   in `shared/`; the returned `Perk` is your handle.
 2. Levels: `player:setPerkLevelDebug(perk, n)`/`getPerkLevel` (cheat-sheet surface); XP:
    `getXp():AddXP(perk, n)` + `getXp():getXP(perk)`; multipliers via `AddXPMultiplierPacket` (MP) and
    perk-linked XP tables.
@@ -90,10 +101,10 @@ static Perk AddPerk(Perk perk, String name, Perk parent,
   `AddPerk` buys you the skills panel, sandbox multiplier integration, save/load and MP for free.
 
 ## Gotchas
-1. **`AddPerk` is additive, not a script block** - no `perk {}` script type; skills register from Lua at
-   initLua (hence `CustomPerks.initLua` existing).
-2. **The 9-int curve ordering isn't named** - match a vanilla perk's decompiled `AddPerk` call for the
-   field semantics (they're level thresholds, but get the direction right).
+1. **`perk {}` blocks exist in `media/perks.txt`** - that IS the script path (`CustomPerks` loads it;
+   `initLua` is the Lua-side hook for computed registrations, not the only route).
+2. **The 10-int curve ordering isn't named** - match a vanilla perk's `perks.txt` block or a decompiled
+   `AddPerk` call for the field semantics (they're level thresholds, but get the direction right).
 3. **Traits/professions are script data but their *effects* are hardcoded trait IDs** - a custom trait
    gets custom behaviour only via your Lua reading `hasTrait`; stock effects (organized, strong...) are
    enum-bound.

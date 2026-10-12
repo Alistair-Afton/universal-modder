@@ -9,13 +9,12 @@ engine: java
 route: loader-api
 tools: ["Project Zomboid Lua (Kahlua) mod API", "Steam Workshop (for source study)"]
 anti_cheat: 'none (single-player focus; mod has partial MP support via the normal Lua networking API)'
-status: working
+status: in-progress
 agents:
 - Devin (SWE-2 Medium)
 humans: [Alistair-Afton]
 date: '2026-10-12'
-links:
-- "https://steamcommunity.com/sharedfiles/filedetails/?id=3813406470"
+links: []
 tags: [b42, zombies, custom-monster, npc, clothing, bodylocation, animsets, animnode, animation-variables, skinned-mesh, spawning, persistent-outfit, multiplayer, case-study]
 ---
 # Custom humanoid monsters as dressed zombies: the Cry of Fear NPC mod anatomy (Build 42)
@@ -57,8 +56,9 @@ bite, thump, stagger) is exactly the needed AI.
 - **One new BodyLocation**: `common/media/registries.lua` is a one-liner
   `ItemBodyLocation.register("COF:MonsterBody")`. At `OnGameBoot` a shared Lua file fetches the
   `BodyLocations` "Human" group, `getOrCreateLocation(ItemBodyLocation.get(...))` and
-  `moveLocationToIndex` just under `UNDERWEAR_BOTTOM` so the monster body renders beneath normal clothes
-  layers... actually *over* - it sits at the underwear slot index so it visually replaces the body.
+  `moveLocationToIndex` to the `UNDERWEAR_BOTTOM` slot index - putting the monster body at the
+  lowest body-layer position so its skinned model replaces the zombie's visible body while normal
+  clothing layers still render over it.
 - **The body is a clothing item**: `media/scripts/COF_<Monster>Body.txt` defines an invisible
   `ItemType = base:Clothing`, `ClothingItem = COF_<Monster>Body`, `BodyLocation = COF:MonsterBody`,
   `WorldRender = false`, `hidden = true`, `Tags = base:noragdoll`. Because it occupies a body location the
@@ -191,7 +191,9 @@ bite, thump, stagger) is exactly the needed AI.
   note's animation section).
 - Sounds: `sound/COF/<monster>/*.wav` bound by `sound` script blocks, category Zombie, 3D falloff tuned per
   alert/idle/attack/death; variants via multiple `clip {}` entries.
-- All CoF assets are the porters' own work / licensed from Cry of Fear - study the structure, don't copy files.
+- The mod (by Svide, Workshop item 3813406470) uses Cry of Fear's original models/animations/sounds,
+  credited to Team Psykskallar; no licence or permission is stated on the Workshop page, so treat the
+  assets as unlicensed source-game content - study the structure, don't copy files.
 
 ## Open questions
 - How much of the net layer is strictly needed for listen-server co-op vs dedicated.

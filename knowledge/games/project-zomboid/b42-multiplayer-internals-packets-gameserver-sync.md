@@ -9,7 +9,7 @@ engine: java
 route: loader-api
 tools: ["javap (JDK)", "zombie.network.* (296 packet classes)", "ServerCommands.lua", "dedicated server (Steam app 380870)"]
 anti_cheat: 'none'
-status: working
+status: in-progress
 agents:
 - Devin (SWE-2 Medium)
 humans: [Alistair-Afton]
@@ -36,7 +36,8 @@ Loader API - the MP layer is Java-internal but Lua-reachable through the documen
 - **`GameServer` (143 KB) / `GameClient` (97 KB)** - the two endpoints; almost all MP verbs route through
   them. `ServerOptions`/`ServerSettings`, `SteamWorkshopItems`/`GameServerWorkshopItems` (workshop sync),
   `DevGameServer`.
-- **`zombie.network.packets` - 296 classes**, one per action: `AddExplosiveTrapPacket`,
+- **`zombie.network.packets` - 296 `.class` files** (the 42.21 javadocs list 272 public types, 112 in
+  the top package - the rest are inner classes), one per action: `AddExplosiveTrapPacket`,
   `AddItemToMapPacket`, `AddObjectToMapPacket`, `AddInventoryItemToContainerPacket`,
   `AddItemInInventoryPacket`, `AddBrokenGlassPacket`, `AddTrackPacket`, `AddXPMultiplierPacket`,
   `AddUserlogPacket`, `AddTicketPacket`, `AddWarningPointPacket`, `BanUnbanUserActionPacket`... the packet
@@ -54,10 +55,10 @@ Loader API - the MP layer is Java-internal but Lua-reachable through the documen
 ## The sync model - the rules that decide if your mod works on a server
 1. **Server owns the world.** State mutations happen on `server/` Lua (or admin-side); presentation lives
    on `client/`. A client that mutates world state changes nothing for other players.
-2. **Commands are the mod-level wire**: `sendServerCommand(module, command, args)` (client→server),
-   `sendClientCommand(player, module, command, args)` (server→client) + `Events.OnServerCommand`/
-   `OnClientCommand`. This is the packet interface mods get - see `ServerCommands.lua` for the vanilla
-   pattern.
+2. **Commands are the mod-level wire**: `sendServerCommand(module, command, args)` (server→client,
+   on `GameServer`), `sendClientCommand(module, command, args)` (client→server, on `GameClient`) +
+   `Events.OnClientCommand` (fires server-side)/`OnServerCommand` (client-side). This is the packet
+   interface mods get - see `ServerCommands.lua` for the vanilla pattern.
 3. **`transmit*`/`sync*` verbs are the engine-level wire** for stock object changes:
    `sq:transmitAddObjectToSquare`/`transmitRemoveItemFromSquare`/`transmitModdata`,
    `obj:sync`/`syncIsoObject(Send|Receive)`/`syncFluidContainer*`, `transmitPlayerVoiceSound`,
@@ -110,8 +111,11 @@ Loader API - the MP layer is Java-internal but Lua-reachable through the documen
 4. **Packets aren't moddable** - you can't subclass `IZomboidPacket` from Lua; new wire messages = the
    command layer.
 5. **`transmitModdata` is square-scoped** - object-level ModData needs `obj:sync` or manual commands.
-6. **Anti-cheat isn't a thing here** - but `ChunkChecksum` divergence + `AddWarningPointPacket` exist;
-   servers CAN flag/kick clients whose world disagrees - sloppy client-side mutation looks like cheating.
+6. **B42 does have server anti-cheat** - `zombie.network.anticheats` ships ~20 check classes
+   (`AntiCheatSpeed`, `AntiCheatNoClip`, `AntiCheatHitDamage`, `AntiCheatXPUpdate`...) gated by
+   `ServerOptions.antiCheat*` switches; a mod mutating state client-side can trip them, and
+   `ChunkChecksum` divergence + `AddWarningPointPacket` exist - sloppy client-side mutation reads as
+   cheating.
 7. **`client/` Lua on dedi is dead code, not an error** - silent no-ops are the worst MP bug source;
    log once from `shared/` with `isServer()`/`isClient()` so you know where each file ran.
 8. **Dedi has no renderer** - any code touching `getRenderer`/UI must be `client/`-gated or it NPEs the

@@ -9,7 +9,7 @@ engine: java
 route: loader-api
 tools: ["Project Zomboid Lua (Kahlua) mod API", "TileZed/WorldEd community forks", "in-game WorldMap editor (media/lua/client/ISUI/Maps/Editor)"]
 anti_cheat: 'none'
-status: working
+status: in-progress
 agents:
 - Devin (SWE-2 Medium)
 humans: [Alistair-Afton]
