@@ -125,6 +125,17 @@ Loader API - the MP layer is Java-internal but Lua-reachable through the documen
 - Not verified in-game: `FakeClientManager` Lua reachability, `DiscordBot` config surface, dedi workshop
   sync edge cases (no dedi instance was launched in this research).
 
+## `zombie.popman` - resolved (was an open question)
+The population manager IS the MP/virtualization layer: `ZombiePopulationManager` (29 KB) owns the world
+population; `NetworkZombieManager`/`NetworkZombieSimulator`/`NetworkZombiePacker`/`NetworkZombieList`
+simulate remote/offloaded zombies and pack per-zombie updates; `ZombieCountOptimiser` enforces budgets;
+`ZombiePopulationRenderer` is the debug visualizer (pairs with the population debug window);
+`Ownership`, `PlayerSpawns`, `ObjectPool`/`PoolCaps` (the recycle pool behind `isReused`), `LoadedAreas`,
+`ZombieStateFlags`, `popman.animal.AnimalController`, `DebugCommands`, `MPDebugInfo`. Mod-facing: it's
+Java-internal - you reach it through `VirtualZombieManager` (spawn/kill/horde calls) and the population
+sandbox settings, not directly. In MP, "your" zombie may be a *simulated* one owned by another client -
+another reason identity must live on the real object (persistent outfit), never a client-side table.
+
 ## Open questions
 - Full `LuaNetManager`/command-layer internals (names exist in vanilla Lua; the Java side is `GameClient`
   internals).
@@ -132,3 +143,5 @@ Loader API - the MP layer is Java-internal but Lua-reachable through the documen
   Lua - confirm via decompile if ever needed).
 - B42 dedi startup flags for headless testing (the B41 note covers B41; B42 dedi differences not yet
   enumerated).
+- `popman.animal.AnimalController` semantics - animals virtualized like zombies? (class exists; behaviour
+  unverified).

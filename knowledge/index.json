@@ -3511,6 +3511,49 @@
   ]
  },
  {
+  "path": "games/project-zomboid/b42-entity-system-gameentities-components-fluids-workstations.md",
+  "kind": "game",
+  "title": "The B42 entity system: GameEntity components, fluids, crafting logic (furnaces/drying/mashing), resources/logistics, Lua components - the real ECS",
+  "game": "Project Zomboid",
+  "games_also": [],
+  "game_version": "Build 42.21.0 (Steam, Windows 10); jar/javap-verified",
+  "platform": "windows",
+  "engine": "java",
+  "route": "loader-api",
+  "tools": [
+   "javap (JDK)",
+   "media/scripts/entities/ (vanilla component data)",
+   "zombie.entity.* package"
+  ],
+  "anti_cheat": "none",
+  "status": "working",
+  "agents": [
+   "Devin (SWE-2 Medium)"
+  ],
+  "humans": [
+   "Alistair-Afton"
+  ],
+  "date": "2026-10-12",
+  "links": [
+   "https://pzwiki.net/wiki/Entity_scripts"
+  ],
+  "tags": [
+   "b42",
+   "entity",
+   "ecs",
+   "components",
+   "fluids",
+   "crafting-bench",
+   "furnace",
+   "drying",
+   "mashing",
+   "resources",
+   "logistics",
+   "workstation",
+   "gameentity"
+  ]
+ },
+ {
   "path": "games/project-zomboid/b42-interactive-world-tile-props-moveables-maps-stashes.md",
   "kind": "game",
   "title": "Build 42 interactive world: tiledef properties, moveables, object taxonomy, map mods, world-map symbols and annotated-map stashes",
@@ -3929,6 +3972,50 @@
    "mannequin",
    "timedaction",
    "data-oriented"
+  ]
+ },
+ {
+  "path": "games/project-zomboid/b42-ui-framework-ispanel-windows-hud-radial-input.md",
+  "kind": "game",
+  "title": "The UI framework: ISUI widget library, custom windows and HUD, radial menus, 3D-model widgets, XUI skinning, input and controller",
+  "game": "Project Zomboid",
+  "games_also": [],
+  "game_version": "Build 42.21.0 (Steam, Windows 10); media/lua/client/ISUI census-verified (138 files)",
+  "platform": "windows",
+  "engine": "java",
+  "route": "loader-api",
+  "tools": [
+   "ISUI Lua framework (138 files in the shipped install)",
+   "ISXuiBuilder/ISXuiSkin",
+   "keyBinding table",
+   "OnMouse/OnKey events"
+  ],
+  "anti_cheat": "none",
+  "status": "working",
+  "agents": [
+   "Devin (SWE-2 Medium)"
+  ],
+  "humans": [
+   "Alistair-Afton"
+  ],
+  "date": "2026-10-12",
+  "links": [
+   "https://pzwiki.net/wiki/Lua_(API)"
+  ],
+  "tags": [
+   "b42",
+   "ui",
+   "isui",
+   "hud",
+   "panels",
+   "windows",
+   "radial-menu",
+   "xui",
+   "skin",
+   "input",
+   "controller",
+   "widgets",
+   "3dmodel"
   ]
  },
  {
