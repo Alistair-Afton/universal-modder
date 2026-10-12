@@ -3332,6 +3332,48 @@
   ]
  },
  {
+  "path": "games/project-zomboid/b42-animation-internals-advanced-animator-layers-variables-events.md",
+  "kind": "game",
+  "title": "Animation internals: AdvancedAnimator, layers/sub-layers, typed animation variables, AnimEvents, AnimNode grammar, grapples, population visuals",
+  "game": "Project Zomboid",
+  "games_also": [],
+  "game_version": "Build 42.21.0 (Steam, Windows 10); javap/jar-verified (113 advancedanimation + 49 animation + 98 model classes)",
+  "platform": "windows",
+  "engine": "java",
+  "route": "loader-api",
+  "tools": [
+   "javap (JDK)",
+   "getAdvancedAnimator() on any IsoGameCharacter",
+   "AnimSets/animscript XML",
+   "zombie.core.skinnedmodel.*"
+  ],
+  "anti_cheat": "none",
+  "status": "working",
+  "agents": [
+   "Devin (SWE-2 Medium)"
+  ],
+  "humans": [
+   "Alistair-Afton"
+  ],
+  "date": "2026-10-12",
+  "links": [
+   "https://pzwiki.net/wiki/Animation_guide"
+  ],
+  "tags": [
+   "b42",
+   "animation",
+   "animator",
+   "animset",
+   "animnode",
+   "animlayer",
+   "variables",
+   "animevents",
+   "grapple",
+   "skeleton",
+   "transitions"
+  ]
+ },
+ {
   "path": "games/project-zomboid/b42-body-simulation-survival-systems-metabolism-farming-fishing.md",
   "kind": "game",
   "title": "The body simulation and survival gameplay systems: Nutrition, Metabolics, Thermoregulator, Fitness, farming, fishing, foraging, traps, power and water",
@@ -3508,6 +3550,47 @@
    "persistent-outfit",
    "multiplayer",
    "case-study"
+  ]
+ },
+ {
+  "path": "games/project-zomboid/b42-custom-skills-perks-traits-professions-registration.md",
+  "kind": "game",
+  "title": "Custom skills, perks, traits and professions: the resolved PerkFactory.AddPerk contract, CustomPerks.initLua, XP curves and character-creation hooks",
+  "game": "Project Zomboid",
+  "games_also": [],
+  "game_version": "Build 42.21.0 (Steam, Windows 10); javap-verified signatures",
+  "platform": "windows",
+  "engine": "java",
+  "route": "loader-api",
+  "tools": [
+   "javap (JDK)",
+   "PerkFactory.AddPerk",
+   "CustomPerks.initLua",
+   "media/scripts trait/profession blocks",
+   "CharacterCreationProfession.lua"
+  ],
+  "anti_cheat": "none",
+  "status": "working",
+  "agents": [
+   "Devin (SWE-2 Medium)"
+  ],
+  "humans": [
+   "Alistair-Afton"
+  ],
+  "date": "2026-10-12",
+  "links": [
+   "https://pzwiki.net/wiki/Lua_(API)"
+  ],
+  "tags": [
+   "b42",
+   "skills",
+   "perks",
+   "traits",
+   "professions",
+   "xp",
+   "perkfactory",
+   "customperk",
+   "character-creation"
   ]
  },
  {

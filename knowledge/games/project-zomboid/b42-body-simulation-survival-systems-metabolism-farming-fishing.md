@@ -115,8 +115,28 @@ invent a second clock).
 - Not verified in-game: writing Thermoregulator multipliers from Lua, custom `SGlobalObjectSystem`
   subclassing beyond the documented pattern (community mods do it), `getBodyFluids` write semantics.
 
+## `forageData` - resolved (was an open question)
+`shared/Foraging/` is a complete data-driven system: `forageSystem.defaultDefinitions` in
+`forageDefinitions.lua` documents every field inline. Three definition tables:
+- **Item defs** (`forageSystem.addItemDef`-family): `type`, `minCount`/`maxCount`, `skill` + `perks{}`
+  (averaged gate), `xp`, `recipes`/`traits`/`itemTags` visibility requirements, `categories{}`,
+  weather modifiers (`rainChance`/`hasRainedChance`/`snowChance`/`dayChance`/`nightChance` percents),
+  `zones = { Forest = n, DeepForest = n, ... }` (**n = roll count, NOT a percent**), `months`/
+  `validMonths`/`bonusMonths`/`malusMonths`, `spawnFuncs{}` (custom pickup callbacks), `forceOutside`/
+  `isOnWater`/`forceOnWater`/`canBeOnTreeSquare`, `doIsoMarkerSprite` (custom marker sprites!),
+  poison fields (`poisonChance`/`poisonPowerMin/Max`/`poisonDetectionLevel` - foraged poison is a
+  data feature), `itemSizeModifier` vision-radius tuning.
+- **Zone defs**: `name` (zone type - DeepForest/FarmLand/TownZone/Nav/ForagingNav...), `densityMin/Max`
+  icons per zone, `refillPercent` per game day, `abundanceSetting` (sandbox key `NatureAbundance`
+  multiplies density), `containsBiomes` (compose zone loot from other zones' tables).
+- **Category defs**: `chance` (rolls), `identifyCategoryPerk`/`identifyCategoryLevel`, `categoryHidden`,
+  `validFloors`/`validFunc` (floor-type rules), `focusChanceMin/Max` (the search-focus reroll rates),
+  plus the same weather/month modifiers.
+Zone state lives in `ModData` `"forageData"` (`forageClient.addZone`/`updateZone`/`updateIcon`,
+`triggerEvent("onUpdateIcon", ...)`) - zone icons are ModData-persisted, server-synced objects.
+Custom forageable content = a new item def + optionally a category + `ISForageIcon` presentation -
+all shared/ data, no Java needed.
+
 ## Open questions
-- Full `forage`/`scavenging` data schema (the tables are Lua-readable; exact field semantics
-  undocumented anywhere).
 - Whether `Thermoregulator_tryouts` (the experimental sibling class in the jar) is live or dead code.
 - Exercise `FitnessExercise` script-data registration surface.
