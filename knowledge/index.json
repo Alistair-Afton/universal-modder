@@ -3291,6 +3291,47 @@
   ]
  },
  {
+  "path": "games/project-zomboid/b42-ai-internals-statemachine-mapknowledge-playerdb-ecs.md",
+  "kind": "game",
+  "title": "AI and save internals: the 101-state StateMachine, A* pathfinding, MapKnowledge, hordes, action states, PlayerDB and the nascent ECS",
+  "game": "Project Zomboid",
+  "games_also": [],
+  "game_version": "Build 42.21.0 (Steam, Windows 10); javap/jar-verified",
+  "platform": "windows",
+  "engine": "java",
+  "route": "loader-api",
+  "tools": [
+   "javap (JDK)",
+   "zombie.ai.* package map",
+   "zombie.savefile.* PlayerDB"
+  ],
+  "anti_cheat": "none",
+  "status": "working",
+  "agents": [
+   "Devin (SWE-2 Medium)"
+  ],
+  "humans": [
+   "Alistair-Afton"
+  ],
+  "date": "2026-10-12",
+  "links": [
+   "https://pzwiki.net/wiki/Lua_(API)"
+  ],
+  "tags": [
+   "b42",
+   "ai",
+   "statemachine",
+   "pathfinding",
+   "mapknowledge",
+   "horde",
+   "actionstate",
+   "save",
+   "playerdb",
+   "ecs",
+   "internals"
+  ]
+ },
+ {
   "path": "games/project-zomboid/b42-body-simulation-survival-systems-metabolism-farming-fishing.md",
   "kind": "game",
   "title": "The body simulation and survival gameplay systems: Nutrition, Metabolics, Thermoregulator, Fitness, farming, fishing, foraging, traps, power and water",
@@ -3606,6 +3647,50 @@
    "translations",
    "debug",
    "networking"
+  ]
+ },
+ {
+  "path": "games/project-zomboid/b42-modder-toolchain-debug-menus-luadebug-automated-testing.md",
+  "kind": "game",
+  "title": "The modder toolchain: launch flags, the 32-window in-game debug suite, DebugOptions/LineDrawer, Lua error anatomy, fast iteration and scripted in-game testing",
+  "game": "Project Zomboid",
+  "games_also": [],
+  "game_version": "Build 42.21.0 (Steam, Windows 10); jar-verified debug package census",
+  "platform": "windows",
+  "engine": "java",
+  "route": "loader-api",
+  "tools": [
+   "-debug launch flag",
+   "zombie.debug (32 debug windows, 48 options)",
+   "console.txt",
+   "um win automation",
+   "EmmyLua (Umbrella)"
+  ],
+  "anti_cheat": "none",
+  "status": "working",
+  "agents": [
+   "Devin (SWE-2 Medium)"
+  ],
+  "humans": [
+   "Alistair-Afton"
+  ],
+  "date": "2026-10-12",
+  "links": [
+   "https://pzwiki.net/wiki/Debug_mode",
+   "https://github.com/PZ-Umbrella/Umbrella"
+  ],
+  "tags": [
+   "b42",
+   "tooling",
+   "debug",
+   "iteration",
+   "console",
+   "lualog",
+   "line-drawer",
+   "debug-windows",
+   "testing",
+   "automation",
+   "profiling"
   ]
  },
  {
