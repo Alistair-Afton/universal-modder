@@ -3291,6 +3291,51 @@
   ]
  },
  {
+  "path": "games/project-zomboid/b42-character-challenge-gameplay-hooks-survivorswap.md",
+  "kind": "game",
+  "title": "Build 42 character & gameplay hooks: SurvivorSwap, perks/skills, body/health, challenges, explosions, render hooks",
+  "game": "Project Zomboid",
+  "games_also": [],
+  "game_version": "Build 42.21.0 (Steam, Windows 10); APIs verified in media/lua of the install",
+  "platform": "windows",
+  "engine": "java",
+  "route": "loader-api",
+  "tools": [
+   "Project Zomboid Lua (Kahlua) mod API"
+  ],
+  "anti_cheat": "none",
+  "status": "working",
+  "agents": [
+   "Devin (SWE-2 Medium)"
+  ],
+  "humans": [
+   "Alistair-Afton"
+  ],
+  "date": "2026-10-12",
+  "links": [
+   "https://pzwiki.net/wiki/Lua_(API)"
+  ],
+  "tags": [
+   "b42",
+   "lua",
+   "challenges",
+   "gamemode",
+   "survivorswap",
+   "traits",
+   "perks",
+   "skills",
+   "health",
+   "bodydamage",
+   "moodles",
+   "nutrition",
+   "voice",
+   "xp",
+   "explosions",
+   "render-hooks",
+   "characters"
+  ]
+ },
+ {
   "path": "games/project-zomboid/b42-custom-monsters-dressed-zombie-route.md",
   "kind": "game",
   "title": "Custom humanoid monsters as dressed zombies: the Cry of Fear NPC mod anatomy (Build 42)",
@@ -3333,6 +3378,51 @@
    "persistent-outfit",
    "multiplayer",
    "case-study"
+  ]
+ },
+ {
+  "path": "games/project-zomboid/b42-interactive-world-tile-props-moveables-maps-stashes.md",
+  "kind": "game",
+  "title": "Build 42 interactive world: tiledef properties, moveables, object taxonomy, map mods, world-map symbols and annotated-map stashes",
+  "game": "Project Zomboid",
+  "games_also": [],
+  "game_version": "Build 42.21.0 (Steam, Windows 10); verified against install media + StashUtil/MapSymbolDefinitions Lua",
+  "platform": "windows",
+  "engine": "java",
+  "route": "loader-api",
+  "tools": [
+   "Project Zomboid Lua (Kahlua) mod API",
+   "TileZed/WorldEd community forks",
+   "in-game WorldMap editor (media/lua/client/ISUI/Maps/Editor)"
+  ],
+  "anti_cheat": "none",
+  "status": "working",
+  "agents": [
+   "Devin (SWE-2 Medium)"
+  ],
+  "humans": [
+   "Alistair-Afton"
+  ],
+  "date": "2026-10-12",
+  "links": [
+   "https://pzwiki.net/wiki/Tile_properties",
+   "https://pzwiki.net/wiki/Mapping"
+  ],
+  "tags": [
+   "b42",
+   "tiles",
+   "tiledef",
+   "tile-properties",
+   "moveables",
+   "iso-objects",
+   "maps",
+   "map-mods",
+   "spawnpoints",
+   "worldmap",
+   "symbols",
+   "stashes",
+   "annotated-maps",
+   "lootable-maps"
   ]
  },
  {
