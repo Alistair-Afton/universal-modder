@@ -46,7 +46,7 @@ Read the task row -> the named notes -> their Build steps. A generic order is be
 | Port a whole enemy from another game (humanoid or animalistic) | `b42-porting-creatures-from-other-games` then the chassis note | zombie `dressInPersistentOutfitID` / animal `addAnimal` |
 | Make a hostile monster that hunts players | `b42-custom-monsters-dressed-zombie-route` | IsoZombie + invisible whole-body clothingItem + AnimSets/zombie |
 | Make an animal/insect/pack creature | `cdda-enemy-pack-ants-...` (animal chassis) + `b42-porting-creatures` | AnimalDefinitions, breeds, `goAttack`/`fleeTo` |
-| Make a friendly NPC / companion / talking survivor | `b42-creatures-beyond-zombies-animals` | `clearAggroList` + `pathToCharacter` + context menu |
+| Make a friendly NPC / companion / talking survivor | `b42-creatures-beyond-zombies-animals` then `b42-survivor-npc-frameworks` (Bandits/ALife anatomy) | `setVariableBoolean` identity + ZA task API + `setBumpType` locomotion |
 | Make a turret/mimic/stationary creature | same note (thumpable chassis) | IsoThumpable `Thump`/`WeaponHit`/`changeSprite` |
 | Make a multi-part boss / swarm / rider+mount | same note (hybrids) | N synced objects + shared ModData HP |
 | Reskin/rewrite the player (new identity, voice, traits) | `b42-character-challenge-gameplay-hooks` | `SurvivorSwap.applyCharacter` |
