@@ -3,7 +3,7 @@ kind: game
 title: 'Master index: every Project Zomboid modding task mapped to the right notes, APIs and recipes (Build 42)'
 game: Project Zomboid
 games_also: []
-game_version: 'Build 42.21.0 (Steam, Windows 10); index of the 22-note B42 docset'
+game_version: 'Build 42.21.0 (Steam, Windows 10); index of the 25-note B42 docset'
 platform: windows
 engine: java
 route: loader-api
@@ -77,6 +77,8 @@ Read the task row -> the named notes -> their Build steps. A generic order is be
 | Radio channels, recorded media, music cues, fonts | same note | RadioData.xml, RecMedia, MusicChoices |
 | Custom UI windows/HUD/radials/minigames | `b42-ui-framework-ispanel` | ISCollapsableWindow + ISUI3DModel + XUI |
 | Tracers, particles, screen feedback | `b42-weapons-ballistics-effects` | media/effects params, blood/gore calls |
+| Audio systems (parameter clips, ambient, loops, voice) | `b42-audio-internals` | GameSound/FMOD params, ObjectAmbientEmitters, limiters |
+| Weather/climate (storms, seasons, temperature, fog) | `b42-weather-climate-internals` | `ClimateManager`, `ThunderStorm`, `ClimateValues` |
 
 ### Combat & gameplay
 | I want to... | Read | Key APIs/classes |
@@ -96,6 +98,7 @@ Read the task row -> the named notes -> their Build steps. A generic order is be
 | Understand events/timed actions/outfits/spawns | `b42-lua-runtime-events` | Events.*, ISTimedActionQueue |
 | Make it work in multiplayer | `b42-multiplayer-internals` + runtime MP section | `sendClientCommand`/`transmit*`/ownership rules |
 | Custom game mode/challenge/scenario | `b42-character-challenge` | `addChallenge`, sandbox writes |
+| Depend on another mod / expose an API | `b42-mod-interop` | `require=`, shared globals, namespacing |
 | "Does the engine expose X?" | `b42-lua-callable-java-cheat-sheet` | javap-verified method clusters |
 | Iterate/test/debug fast | `b42-modder-toolchain` | -debug, 32 debug windows, console.txt, um win |
 | Reverse-engineer a behaviour | cheat-sheet workflow + toolchain | javap -> Umbrella -> ZomboidDecompiler |
