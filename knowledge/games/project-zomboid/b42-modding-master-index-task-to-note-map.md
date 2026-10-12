@@ -98,7 +98,8 @@ Read the task row -> the named notes -> their Build steps. A generic order is be
 | Understand events/timed actions/outfits/spawns | `b42-lua-runtime-events` | Events.*, ISTimedActionQueue |
 | Make it work in multiplayer | `b42-multiplayer-internals` + runtime MP section | `sendClientCommand`/`transmit*`/ownership rules |
 | Custom game mode/challenge/scenario | `b42-character-challenge` | `addChallenge`, sandbox writes |
-| Depend on another mod / expose an API | `b42-mod-interop` | `require=`, shared globals, namespacing |
+| Depend on another mod / expose an API | `b42-mod-interop` then `b42-content-pack-scenario` (4 shipped architectures) | `require=`, shared globals, namespacing |
+| Patch/extend another mod, or ship a scenario pack | `b42-content-pack-scenario` | `PrependFunction` wraps, ModData bridges, `getModFileReader` + custom formats |
 | "Does the engine expose X?" | `b42-lua-callable-java-cheat-sheet` | javap-verified method clusters |
 | Iterate/test/debug fast | `b42-modder-toolchain` | -debug, 32 debug windows, console.txt, um win |
 | Reverse-engineer a behaviour | cheat-sheet workflow + toolchain | javap -> Umbrella -> ZomboidDecompiler |

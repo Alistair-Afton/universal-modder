@@ -3972,6 +3972,48 @@
   ]
  },
  {
+  "path": "games/project-zomboid/b42-content-pack-scenario-mod-architectures.md",
+  "kind": "game",
+  "title": "Content-pack and scenario-mod architectures: BanditsWeekOne outbreak sim, BeyondOneWeek function-patching, CDALifePatch bridges, .alife custom data formats",
+  "game": "Project Zomboid",
+  "games_also": [],
+  "game_version": "Build 42.21.0 (Steam, Windows 10); mods: BanditsWeekOne (3403180543), BeyondOneWeek (3405043636), ProjectALifeAftermath (3806063445), ProjectALifeJimmy (3806944055), CDALifePatch (3807738026), ALifeKnoxFractured (3813871509)",
+  "platform": "windows",
+  "engine": "java",
+  "route": "loader-api",
+  "tools": [
+   "workshop items 3403180543/3405043636/3806063445/3806944055/3807738026/3813871509",
+   "getModFileReader",
+   "function-wrapping"
+  ],
+  "anti_cheat": "none",
+  "status": "working",
+  "agents": [
+   "Devin (SWE-2 Medium)"
+  ],
+  "humans": [
+   "Alistair-Afton"
+  ],
+  "date": "2026-10-12",
+  "links": [
+   "https://steamcommunity.com/sharedfiles/filedetails/?id=3403180543",
+   "https://steamcommunity.com/sharedfiles/filedetails/?id=3405043636",
+   "https://steamcommunity.com/sharedfiles/filedetails/?id=3813871509"
+  ],
+  "tags": [
+   "b42",
+   "scenario",
+   "content-pack",
+   "outbreak",
+   "radio",
+   "patching",
+   "wrapper",
+   "compat-bridge",
+   "custom-format",
+   "getModFileReader"
+  ]
+ },
+ {
   "path": "games/project-zomboid/b42-creatures-beyond-zombies-animals-npcs-mannequins-thumpables.md",
   "kind": "game",
   "title": "Creatures beyond zombies and animals: friendly NPCs, mannequins, thumpable pseudo-creatures, multi-part bosses and hybrids",
