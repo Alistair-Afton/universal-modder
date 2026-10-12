@@ -3426,6 +3426,55 @@
   ]
  },
  {
+  "path": "games/project-zomboid/b42-lua-callable-java-cheat-sheet.md",
+  "kind": "game",
+  "title": "The Lua-callable Java surface: a cheat sheet of the methods that matter on 15 key classes (42.21.0 javap dump)",
+  "game": "Project Zomboid",
+  "games_also": [],
+  "game_version": "Build 42.21.0 (Steam, Windows 10); method names dumped from projectzomboid.jar with javap",
+  "platform": "windows",
+  "engine": "java",
+  "route": "loader-api",
+  "tools": [
+   "javap (JDK)",
+   "PZ-Umbrella stubs for signatures",
+   "ZomboidDecompiler for internals"
+  ],
+  "anti_cheat": "none",
+  "status": "working",
+  "agents": [
+   "Devin (SWE-2 Medium)"
+  ],
+  "humans": [
+   "Alistair-Afton"
+  ],
+  "date": "2026-10-12",
+  "links": [
+   "https://www.projectzomboid.com/modding/",
+   "https://github.com/PZ-Umbrella/Umbrella"
+  ],
+  "tags": [
+   "b42",
+   "api",
+   "cheat-sheet",
+   "javap",
+   "isozombie",
+   "isoplayer",
+   "isoanimal",
+   "isogridsquare",
+   "isocell",
+   "isoworld",
+   "inventoryitem",
+   "itemcontainer",
+   "basevehicle",
+   "virtualzombiemanager",
+   "scriptmanager",
+   "bodydamage",
+   "stats",
+   "isoobject"
+  ]
+ },
+ {
   "path": "games/project-zomboid/b42-lua-runtime-events-timedactions-ui-outfits-spawns.md",
   "kind": "game",
   "title": "Build 42 Lua runtime in practice: events, timed actions, context menus, UI, ModOptions, outfits and spawn tables",
@@ -3521,6 +3570,55 @@
    "workshop",
    "tooling",
    "orientation"
+  ]
+ },
+ {
+  "path": "games/project-zomboid/b42-porting-creatures-from-other-games.md",
+  "kind": "game",
+  "title": "Porting whole creatures from other games into Build 42: three proven routes (original assets, converted assets, generated assets)",
+  "game": "Project Zomboid",
+  "games_also": [
+   "Cry of Fear",
+   "Half-Life",
+   "Cataclysm: Dark Days Ahead"
+  ],
+  "game_version": "Build 42.21.0 (Steam, Windows 10); routes verified in three live ports: CoF Monsters 0.68.25, HLMonsters 0.1.0, CDDA Ants",
+  "platform": "windows",
+  "engine": "java",
+  "route": "loader-api",
+  "tools": [
+   "Project Zomboid Lua (Kahlua) mod API",
+   "jassimp64 (assimp model loader in the game)",
+   "Blender + DirectX X importer",
+   "Crowbar/pymeshlab for source formats",
+   "fal (Meshy, ElevenLabs)"
+  ],
+  "anti_cheat": "none (single-player creature mods)",
+  "status": "working",
+  "agents": [
+   "Devin (SWE-2 Medium)"
+  ],
+  "humans": [
+   "Alistair-Afton"
+  ],
+  "date": "2026-10-12",
+  "links": [
+   "https://steamcommunity.com/sharedfiles/filedetails/?id=3813406470"
+  ],
+  "tags": [
+   "b42",
+   "creatures",
+   "monsters",
+   "cross-game-port",
+   "models",
+   "skinned-mesh",
+   "animations",
+   "animsets",
+   "ai",
+   "sounds",
+   "legal",
+   "houndeye",
+   "cry-of-fear"
   ]
  },
  {
