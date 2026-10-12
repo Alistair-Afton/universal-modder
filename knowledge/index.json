@@ -3291,6 +3291,51 @@
   ]
  },
  {
+  "path": "games/project-zomboid/b42-body-simulation-survival-systems-metabolism-farming-fishing.md",
+  "kind": "game",
+  "title": "The body simulation and survival gameplay systems: Nutrition, Metabolics, Thermoregulator, Fitness, farming, fishing, foraging, traps, power and water",
+  "game": "Project Zomboid",
+  "games_also": [],
+  "game_version": "Build 42.21.0 (Steam, Windows 10); javap-verified class surfaces",
+  "platform": "windows",
+  "engine": "java",
+  "route": "loader-api",
+  "tools": [
+   "javap (JDK)",
+   "media/lua/client/Farming|Fishing",
+   "SGlobalObjectSystem (rain barrels, generators)"
+  ],
+  "anti_cheat": "none",
+  "status": "working",
+  "agents": [
+   "Devin (SWE-2 Medium)"
+  ],
+  "humans": [
+   "Alistair-Afton"
+  ],
+  "date": "2026-10-12",
+  "links": [
+   "https://pzwiki.net/wiki/Lua_(API)"
+  ],
+  "tags": [
+   "b42",
+   "survival",
+   "metabolism",
+   "nutrition",
+   "thermoregulator",
+   "fitness",
+   "farming",
+   "fishing",
+   "foraging",
+   "traps",
+   "generator",
+   "rain-barrel",
+   "needs",
+   "moodles",
+   "illness"
+  ]
+ },
+ {
   "path": "games/project-zomboid/b42-character-challenge-gameplay-hooks-survivorswap.md",
   "kind": "game",
   "title": "Build 42 character & gameplay hooks: SurvivorSwap, perks/skills, body/health, challenges, explosions, render hooks",
@@ -3614,6 +3659,47 @@
    "workshop",
    "tooling",
    "orientation"
+  ]
+ },
+ {
+  "path": "games/project-zomboid/b42-multiplayer-internals-packets-gameserver-sync.md",
+  "kind": "game",
+  "title": "Multiplayer internals: the 296-class packet layer, GameClient/GameServer, ownership, co-op hosting and MP-safe mod patterns",
+  "game": "Project Zomboid",
+  "games_also": [],
+  "game_version": "Build 42.21.0 (Steam, Windows 10); javap/jar-verified",
+  "platform": "windows",
+  "engine": "java",
+  "route": "loader-api",
+  "tools": [
+   "javap (JDK)",
+   "zombie.network.* (296 packet classes)",
+   "ServerCommands.lua",
+   "dedicated server (Steam app 380870)"
+  ],
+  "anti_cheat": "none",
+  "status": "working",
+  "agents": [
+   "Devin (SWE-2 Medium)"
+  ],
+  "humans": [
+   "Alistair-Afton"
+  ],
+  "date": "2026-10-12",
+  "links": [
+   "https://pzwiki.net/wiki/Networking"
+  ],
+  "tags": [
+   "b42",
+   "multiplayer",
+   "server",
+   "packets",
+   "sync",
+   "ownership",
+   "dedicated-server",
+   "co-op",
+   "networking",
+   "luanet"
   ]
  },
  {
