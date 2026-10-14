@@ -3960,7 +3960,7 @@
    "grep"
   ],
   "anti_cheat": "none (single player)",
-  "status": "in-progress",
+  "status": "working",
   "agents": [
    "Claude Code (Opus 5)",
    "Claude Code (Opus 5.5)"
@@ -3987,887 +3987,27 @@
   ]
  },
  {
-  "path": "games/project-zomboid/b42-ai-internals-statemachine-mapknowledge-playerdb-ecs.md",
+  "path": "games/project-zomboid/b42-creatures-dressed-zombies-ports-and-npc-frameworks.md",
   "kind": "game",
-  "title": "AI and save internals: the 101-state StateMachine, A* pathfinding, MapKnowledge, hordes, action states, PlayerDB and the nascent ECS",
-  "game": "Project Zomboid",
-  "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10); javap/jar-verified",
-  "platform": "windows",
-  "engine": "java",
-  "route": "loader-api",
-  "tools": [
-   "javap (JDK)",
-   "zombie.ai.* package map",
-   "zombie.savefile.* PlayerDB"
-  ],
-  "anti_cheat": "none",
-  "status": "in-progress",
-  "agents": [
-   "Devin (SWE-2 Medium)"
-  ],
-  "humans": [
-   "Alistair-Afton"
-  ],
-  "date": "2026-10-12",
-  "links": [
-   "https://pzwiki.net/wiki/Lua_(API)"
-  ],
-  "tags": [
-   "b42",
-   "ai",
-   "statemachine",
-   "pathfinding",
-   "mapknowledge",
-   "horde",
-   "actionstate",
-   "save",
-   "playerdb",
-   "ecs",
-   "internals"
-  ]
- },
- {
-  "path": "games/project-zomboid/b42-animation-internals-advanced-animator-layers-variables-events.md",
-  "kind": "game",
-  "title": "Animation internals: AdvancedAnimator, layers/sub-layers, typed animation variables, AnimEvents, AnimNode grammar, grapples, population visuals",
-  "game": "Project Zomboid",
-  "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10); javap/jar-verified (113 advancedanimation + 49 animation + 98 model classes)",
-  "platform": "windows",
-  "engine": "java",
-  "route": "loader-api",
-  "tools": [
-   "javap (JDK)",
-   "getAdvancedAnimator() on any IsoGameCharacter",
-   "AnimSets/animscript XML",
-   "zombie.core.skinnedmodel.*"
-  ],
-  "anti_cheat": "none",
-  "status": "in-progress",
-  "agents": [
-   "Devin (SWE-2 Medium)"
-  ],
-  "humans": [
-   "Alistair-Afton"
-  ],
-  "date": "2026-10-12",
-  "links": [
-   "https://pzwiki.net/wiki/Animation_guide"
-  ],
-  "tags": [
-   "b42",
-   "animation",
-   "animator",
-   "animset",
-   "animnode",
-   "animlayer",
-   "variables",
-   "animevents",
-   "grapple",
-   "skeleton",
-   "transitions"
-  ]
- },
- {
-  "path": "games/project-zomboid/b42-audio-internals-gamesound-fmod-params-ambient-walls.md",
-  "kind": "game",
-  "title": "Audio internals: the real FMOD engine, GameSound clips/parameters/sustain points, ambient walls, sound limiters, voice, dynamic music scoring",
-  "game": "Project Zomboid",
-  "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10); javap/jar-verified (zombie.audio, 25 classes)",
-  "platform": "windows",
-  "engine": "java",
-  "route": "loader-api",
-  "tools": [
-   "javap (JDK)",
-   "sound script blocks",
-   "FMOD parameters",
-   "media/sound"
-  ],
-  "anti_cheat": "none",
-  "status": "in-progress",
-  "agents": [
-   "Devin (SWE-2 Medium)"
-  ],
-  "humans": [
-   "Alistair-Afton"
-  ],
-  "date": "2026-10-12",
-  "links": [
-   "https://pzwiki.net/wiki/Sound_scripts"
-  ],
-  "tags": [
-   "b42",
-   "audio",
-   "sound",
-   "fmod",
-   "gamesound",
-   "clips",
-   "parameters",
-   "ambient-walls",
-   "limiter",
-   "voice",
-   "music",
-   "occlusion"
-  ]
- },
- {
-  "path": "games/project-zomboid/b42-body-simulation-survival-systems-metabolism-farming-fishing.md",
-  "kind": "game",
-  "title": "The body simulation and survival gameplay systems: Nutrition, Metabolics, Thermoregulator, Fitness, farming, fishing, foraging, traps, power and water",
-  "game": "Project Zomboid",
-  "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10); javap-verified class surfaces",
-  "platform": "windows",
-  "engine": "java",
-  "route": "loader-api",
-  "tools": [
-   "javap (JDK)",
-   "media/lua/client/Farming|Fishing",
-   "SGlobalObjectSystem (rain barrels, generators)"
-  ],
-  "anti_cheat": "none",
-  "status": "in-progress",
-  "agents": [
-   "Devin (SWE-2 Medium)"
-  ],
-  "humans": [
-   "Alistair-Afton"
-  ],
-  "date": "2026-10-12",
-  "links": [
-   "https://pzwiki.net/wiki/Lua_(API)"
-  ],
-  "tags": [
-   "b42",
-   "survival",
-   "metabolism",
-   "nutrition",
-   "thermoregulator",
-   "fitness",
-   "farming",
-   "fishing",
-   "foraging",
-   "traps",
-   "generator",
-   "rain-barrel",
-   "needs",
-   "moodles",
-   "illness"
-  ]
- },
- {
-  "path": "games/project-zomboid/b42-character-challenge-gameplay-hooks-survivorswap.md",
-  "kind": "game",
-  "title": "Build 42 character & gameplay hooks: SurvivorSwap, perks/skills, body/health, challenges, explosions, render hooks",
-  "game": "Project Zomboid",
-  "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10); APIs verified in media/lua of the install",
-  "platform": "windows",
-  "engine": "java",
-  "route": "loader-api",
-  "tools": [
-   "Project Zomboid Lua (Kahlua) mod API"
-  ],
-  "anti_cheat": "none",
-  "status": "in-progress",
-  "agents": [
-   "Devin (SWE-2 Medium)"
-  ],
-  "humans": [
-   "Alistair-Afton"
-  ],
-  "date": "2026-10-12",
-  "links": [
-   "https://pzwiki.net/wiki/Lua_(API)"
-  ],
-  "tags": [
-   "b42",
-   "lua",
-   "challenges",
-   "gamemode",
-   "survivorswap",
-   "traits",
-   "perks",
-   "skills",
-   "health",
-   "bodydamage",
-   "moodles",
-   "nutrition",
-   "voice",
-   "xp",
-   "explosions",
-   "render-hooks",
-   "characters"
-  ]
- },
- {
-  "path": "games/project-zomboid/b42-content-pack-scenario-mod-architectures.md",
-  "kind": "game",
-  "title": "Content-pack and scenario-mod architectures: BanditsWeekOne outbreak sim, BeyondOneWeek function-patching, CDALifePatch bridges, .alife custom data formats",
-  "game": "Project Zomboid",
-  "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10); mods: BanditsWeekOne (3403180543), BeyondOneWeek (3405043636), ProjectALifeAftermath (3806063445), ProjectALifeJimmy (3806944055), CDALifePatch (3807738026), ALifeKnoxFractured (3813871509)",
-  "platform": "windows",
-  "engine": "java",
-  "route": "loader-api",
-  "tools": [
-   "workshop items 3403180543/3405043636/3806063445/3806944055/3807738026/3813871509",
-   "getModFileReader",
-   "function-wrapping"
-  ],
-  "anti_cheat": "none",
-  "status": "in-progress",
-  "agents": [
-   "Devin (SWE-2 Medium)"
-  ],
-  "humans": [
-   "Alistair-Afton"
-  ],
-  "date": "2026-10-12",
-  "links": [
-   "https://steamcommunity.com/sharedfiles/filedetails/?id=3403180543",
-   "https://steamcommunity.com/sharedfiles/filedetails/?id=3405043636",
-   "https://steamcommunity.com/sharedfiles/filedetails/?id=3813871509"
-  ],
-  "tags": [
-   "b42",
-   "scenario",
-   "content-pack",
-   "outbreak",
-   "radio",
-   "patching",
-   "wrapper",
-   "compat-bridge",
-   "custom-format",
-   "getModFileReader"
-  ]
- },
- {
-  "path": "games/project-zomboid/b42-creatures-beyond-zombies-animals-npcs-mannequins-thumpables.md",
-  "kind": "game",
-  "title": "Creatures beyond zombies and animals: friendly NPCs, mannequins, thumpable pseudo-creatures, multi-part bosses and hybrids",
-  "game": "Project Zomboid",
-  "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10)",
-  "platform": "windows",
-  "engine": "java",
-  "route": "loader-api",
-  "tools": [
-   "javap (JDK)",
-   "SurvivorSwap API",
-   "MannequinScript blocks",
-   "IsoThumpable",
-   "Bullet physics (btBullet)"
-  ],
-  "anti_cheat": "none",
-  "status": "in-progress",
-  "agents": [
-   "Devin (SWE-2 Medium)"
-  ],
-  "humans": [
-   "Alistair-Afton"
-  ],
-  "date": "2026-10-12",
-  "links": [
-   "https://pzwiki.net/wiki/Lua_(API)"
-  ],
-  "tags": [
-   "b42",
-   "creatures",
-   "npc",
-   "follower",
-   "companion",
-   "mannequin",
-   "thumpable",
-   "boss",
-   "hybrid",
-   "ragdoll",
-   "survivor",
-   "pseudo-creature"
-  ]
- },
- {
-  "path": "games/project-zomboid/b42-custom-monsters-dressed-zombie-route.md",
-  "kind": "game",
-  "title": "Custom humanoid monsters as dressed zombies: the Cry of Fear NPC mod anatomy (Build 42)",
-  "game": "Project Zomboid",
-  "games_also": [
-   "Cry of Fear"
-  ],
-  "game_version": "Project Zomboid 42.21.0 (Steam, Windows 10); mod version 0.68.25, modversion 42.20+, Workshop item 3813406470",
-  "platform": "windows",
-  "engine": "java",
-  "route": "loader-api",
-  "tools": [
-   "Project Zomboid Lua (Kahlua) mod API",
-   "Steam Workshop (for source study)"
-  ],
-  "anti_cheat": "none (single-player focus; mod has partial MP support via the normal Lua networking API)",
-  "status": "in-progress",
-  "agents": [
-   "Devin (SWE-2 Medium)"
-  ],
-  "humans": [
-   "Alistair-Afton"
-  ],
-  "date": "2026-10-12",
-  "links": [],
-  "tags": [
-   "b42",
-   "zombies",
-   "custom-monster",
-   "npc",
-   "clothing",
-   "bodylocation",
-   "animsets",
-   "animnode",
-   "animation-variables",
-   "skinned-mesh",
-   "spawning",
-   "persistent-outfit",
-   "multiplayer",
-   "case-study"
-  ]
- },
- {
-  "path": "games/project-zomboid/b42-custom-skills-perks-traits-professions-registration.md",
-  "kind": "game",
-  "title": "Custom skills, perks, traits and professions: the resolved PerkFactory.AddPerk contract, CustomPerks.initLua, XP curves and character-creation hooks",
-  "game": "Project Zomboid",
-  "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10); javap-verified signatures",
-  "platform": "windows",
-  "engine": "java",
-  "route": "loader-api",
-  "tools": [
-   "javap (JDK)",
-   "PerkFactory.AddPerk",
-   "CustomPerks.initLua",
-   "media/scripts trait/profession blocks",
-   "CharacterCreationProfession.lua"
-  ],
-  "anti_cheat": "none",
-  "status": "in-progress",
-  "agents": [
-   "Devin (SWE-2 Medium)"
-  ],
-  "humans": [
-   "Alistair-Afton"
-  ],
-  "date": "2026-10-12",
-  "links": [
-   "https://pzwiki.net/wiki/Lua_(API)"
-  ],
-  "tags": [
-   "b42",
-   "skills",
-   "perks",
-   "traits",
-   "professions",
-   "xp",
-   "perkfactory",
-   "customperk",
-   "character-creation"
-  ]
- },
- {
-  "path": "games/project-zomboid/b42-entity-system-gameentities-components-fluids-workstations.md",
-  "kind": "game",
-  "title": "The B42 entity system: GameEntity components, fluids, crafting logic (furnaces/drying/mashing), resources/logistics, Lua components - the real ECS",
-  "game": "Project Zomboid",
-  "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10); jar/javap-verified",
-  "platform": "windows",
-  "engine": "java",
-  "route": "loader-api",
-  "tools": [
-   "javap (JDK)",
-   "media/scripts/entities/ (vanilla component data)",
-   "zombie.entity.* package"
-  ],
-  "anti_cheat": "none",
-  "status": "in-progress",
-  "agents": [
-   "Devin (SWE-2 Medium)"
-  ],
-  "humans": [
-   "Alistair-Afton"
-  ],
-  "date": "2026-10-12",
-  "links": [
-   "https://pzwiki.net/wiki/Entity_scripts"
-  ],
-  "tags": [
-   "b42",
-   "entity",
-   "ecs",
-   "components",
-   "fluids",
-   "crafting-bench",
-   "furnace",
-   "drying",
-   "mashing",
-   "resources",
-   "logistics",
-   "workstation",
-   "gameentity"
-  ]
- },
- {
-  "path": "games/project-zomboid/b42-interactive-world-tile-props-moveables-maps-stashes.md",
-  "kind": "game",
-  "title": "Build 42 interactive world: tiledef properties, moveables, object taxonomy, map mods, world-map symbols and annotated-map stashes",
-  "game": "Project Zomboid",
-  "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10); verified against install media + StashUtil/MapSymbolDefinitions Lua",
-  "platform": "windows",
-  "engine": "java",
-  "route": "loader-api",
-  "tools": [
-   "Project Zomboid Lua (Kahlua) mod API",
-   "TileZed/WorldEd community forks",
-   "in-game WorldMap editor (media/lua/client/ISUI/Maps/Editor)"
-  ],
-  "anti_cheat": "none",
-  "status": "in-progress",
-  "agents": [
-   "Devin (SWE-2 Medium)"
-  ],
-  "humans": [
-   "Alistair-Afton"
-  ],
-  "date": "2026-10-12",
-  "links": [
-   "https://pzwiki.net/wiki/Tile_properties",
-   "https://pzwiki.net/wiki/Mapping"
-  ],
-  "tags": [
-   "b42",
-   "tiles",
-   "tiledef",
-   "tile-properties",
-   "moveables",
-   "iso-objects",
-   "maps",
-   "map-mods",
-   "spawnpoints",
-   "worldmap",
-   "symbols",
-   "stashes",
-   "annotated-maps",
-   "lootable-maps"
-  ]
- },
- {
-  "path": "games/project-zomboid/b42-lua-callable-java-cheat-sheet.md",
-  "kind": "game",
-  "title": "The Lua-callable Java surface: a cheat sheet of the methods that matter on 15 key classes (42.21.0 javap dump)",
-  "game": "Project Zomboid",
-  "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10); method names dumped from projectzomboid.jar with javap",
-  "platform": "windows",
-  "engine": "java",
-  "route": "loader-api",
-  "tools": [
-   "javap (JDK)",
-   "PZ-Umbrella stubs for signatures",
-   "ZomboidDecompiler for internals"
-  ],
-  "anti_cheat": "none",
-  "status": "in-progress",
-  "agents": [
-   "Devin (SWE-2 Medium)"
-  ],
-  "humans": [
-   "Alistair-Afton"
-  ],
-  "date": "2026-10-12",
-  "links": [
-   "https://www.projectzomboid.com/modding/",
-   "https://github.com/PZ-Umbrella/Umbrella"
-  ],
-  "tags": [
-   "b42",
-   "api",
-   "cheat-sheet",
-   "javap",
-   "isozombie",
-   "isoplayer",
-   "isoanimal",
-   "isogridsquare",
-   "isocell",
-   "isoworld",
-   "inventoryitem",
-   "itemcontainer",
-   "basevehicle",
-   "virtualzombiemanager",
-   "scriptmanager",
-   "bodydamage",
-   "stats",
-   "isoobject"
-  ]
- },
- {
-  "path": "games/project-zomboid/b42-lua-runtime-events-timedactions-ui-outfits-spawns.md",
-  "kind": "game",
-  "title": "Build 42 Lua runtime in practice: events, timed actions, context menus, UI, ModOptions, outfits and spawn tables",
-  "game": "Project Zomboid",
-  "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10); all paths/APIs verified in the install media/lua and two live mods",
-  "platform": "windows",
-  "engine": "java",
-  "route": "loader-api",
-  "tools": [
-   "Project Zomboid Lua (Kahlua) mod API",
-   "PZ-Umbrella EmmyLua stubs",
-   "PZAPI.ModOptions (vanilla mod-options UI)"
-  ],
-  "anti_cheat": "none (single-player; hosted servers run the same Lua)",
-  "status": "in-progress",
-  "agents": [
-   "Devin (SWE-2 Medium)"
-  ],
-  "humans": [
-   "Alistair-Afton"
-  ],
-  "date": "2026-10-12",
-  "links": [
-   "https://pzwiki.net/wiki/Lua_(API)",
-   "https://pzwiki.net/wiki/Lua_event",
-   "https://github.com/PZ-Umbrella/Umbrella"
-  ],
-  "tags": [
-   "b42",
-   "lua",
-   "events",
-   "timed-actions",
-   "context-menu",
-   "ui",
-   "pzapi",
-   "modoptions",
-   "outfits",
-   "spawn-tables",
-   "translations",
-   "debug",
-   "networking"
-  ]
- },
- {
-  "path": "games/project-zomboid/b42-map-files-formats-lotheader-chunkdata-worldgen-engine.md",
-  "kind": "game",
-  "title": "Map files and the worldgen engine: lotheader/chunkdata binaries, map folder anatomy, the 101-class procedural worldgen runtime, areas/zones internals",
-  "game": "Project Zomboid",
-  "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10); jar/file-system-verified",
-  "platform": "windows",
-  "engine": "java",
-  "route": "loader-api",
-  "tools": [
-   "TileZed/WorldEd community forks",
-   "media/maps/<town>/ folder anatomy",
-   "worldgen Lua tables",
-   "javap (JDK)"
-  ],
-  "anti_cheat": "none",
-  "status": "in-progress",
-  "agents": [
-   "Devin (SWE-2 Medium)"
-  ],
-  "humans": [
-   "Alistair-Afton"
-  ],
-  "date": "2026-10-12",
-  "links": [
-   "https://pzwiki.net/wiki/Mapping"
-  ],
-  "tags": [
-   "b42",
-   "maps",
-   "lotheader",
-   "chunkdata",
-   "worldgen",
-   "binary-formats",
-   "zones",
-   "areas",
-   "towns",
-   "procedural"
-  ]
- },
- {
-  "path": "games/project-zomboid/b42-mod-interop-load-order-shared-globals-compat.md",
-  "kind": "game",
-  "title": "Mod interop: load order, require=/mod.info dependencies, shared Lua globals as APIs, conflict patterns and building mods that cooperate",
-  "game": "Project Zomboid",
-  "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10)",
-  "platform": "windows",
-  "engine": "java",
-  "route": "loader-api",
-  "tools": [
-   "mod.info require= key",
-   "shared Lua globals",
-   "OnGameBoot/OnGameTimeLoaded ordering",
-   "mod hooks"
-  ],
-  "anti_cheat": "none",
-  "status": "in-progress",
-  "agents": [
-   "Devin (SWE-2 Medium)"
-  ],
-  "humans": [
-   "Alistair-Afton"
-  ],
-  "date": "2026-10-12",
-  "links": [
-   "https://pzwiki.net/wiki/Mod.info"
-  ],
-  "tags": [
-   "b42",
-   "interop",
-   "dependencies",
-   "load-order",
-   "api",
-   "compat",
-   "shared",
-   "globals"
-  ]
- },
- {
-  "path": "games/project-zomboid/b42-modder-toolchain-debug-menus-luadebug-automated-testing.md",
-  "kind": "game",
-  "title": "The modder toolchain: launch flags, the 32-window in-game debug suite, DebugOptions/LineDrawer, Lua error anatomy, fast iteration and scripted in-game testing",
-  "game": "Project Zomboid",
-  "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10); jar-verified debug package census",
-  "platform": "windows",
-  "engine": "java",
-  "route": "loader-api",
-  "tools": [
-   "-debug launch flag",
-   "zombie.debug (32 debug windows, 48 options)",
-   "console.txt",
-   "um win automation",
-   "EmmyLua (Umbrella)"
-  ],
-  "anti_cheat": "none",
-  "status": "in-progress",
-  "agents": [
-   "Devin (SWE-2 Medium)"
-  ],
-  "humans": [
-   "Alistair-Afton"
-  ],
-  "date": "2026-10-12",
-  "links": [
-   "https://pzwiki.net/wiki/Debug_mode",
-   "https://github.com/PZ-Umbrella/Umbrella"
-  ],
-  "tags": [
-   "b42",
-   "tooling",
-   "debug",
-   "iteration",
-   "console",
-   "lualog",
-   "line-drawer",
-   "debug-windows",
-   "testing",
-   "automation",
-   "profiling"
-  ]
- },
- {
-  "path": "games/project-zomboid/b42-modding-anatomy-mod-structure-lua-assets-workshop.md",
-  "kind": "game",
-  "title": "Build 42 modding anatomy: mod folders, media assets, Lua, scripts, tooling and Workshop publishing",
-  "game": "Project Zomboid",
-  "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10); structure verified against the install and two live mods (Workshop 3813406470, a local animal mod)",
-  "platform": "windows",
-  "engine": "java",
-  "route": "loader-api",
-  "tools": [
-   "Project Zomboid Lua (Kahlua) mod API",
-   "PZ-Umbrella EmmyLua stubs",
-   "demiurgeQuantified/ZomboidDecompiler (Vineflower)",
-   "javap",
-   "TileZed/WorldEd community forks",
-   "Blender + Paddlefruit rig / DirectX X importer"
-  ],
-  "anti_cheat": "none. Single-player is unprotected; no client patching exists or is needed - mods are Lua + data loaded by the game itself. Hosted dedicated servers run the same mod set, so stay out of servers you do not control.",
-  "status": "in-progress",
-  "agents": [
-   "Devin (SWE-2 Medium)"
-  ],
-  "humans": [
-   "Alistair-Afton"
-  ],
-  "date": "2026-10-12",
-  "links": [
-   "https://pzwiki.net/wiki/Modding",
-   "https://pzwiki.net/wiki/Mod_structure",
-   "https://github.com/PZ-Umbrella/Umbrella",
-   "https://github.com/demiurgeQuantified/ZomboidDecompiler",
-   "https://www.projectzomboid.com/modding/"
-  ],
-  "tags": [
-   "b42",
-   "mod-structure",
-   "lua",
-   "kahlua",
-   "scripts",
-   "animsets",
-   "models",
-   "sounds",
-   "sandbox-options",
-   "translations",
-   "texturepacks",
-   "maps",
-   "multiplayer",
-   "workshop",
-   "tooling",
-   "orientation"
-  ]
- },
- {
-  "path": "games/project-zomboid/b42-modding-master-index-task-to-note-map.md",
-  "kind": "game",
-  "title": "Master index: every Project Zomboid modding task mapped to the right notes, APIs and recipes (Build 42)",
-  "game": "Project Zomboid",
-  "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10); index of the 25-note B42 docset",
-  "platform": "windows",
-  "engine": "java",
-  "route": "loader-api",
-  "tools": [
-   "the b42-* note series in this KB"
-  ],
-  "anti_cheat": "none",
-  "status": "in-progress",
-  "agents": [
-   "Devin (SWE-2 Medium)"
-  ],
-  "humans": [
-   "Alistair-Afton"
-  ],
-  "date": "2026-10-12",
-  "links": [
-   "https://pzwiki.net/wiki/Modding"
-  ],
-  "tags": [
-   "b42",
-   "index",
-   "master",
-   "map",
-   "recipes",
-   "tasks"
-  ]
- },
- {
-  "path": "games/project-zomboid/b42-multiplayer-internals-packets-gameserver-sync.md",
-  "kind": "game",
-  "title": "Multiplayer internals: the 296-class packet layer, GameClient/GameServer, ownership, co-op hosting and MP-safe mod patterns",
-  "game": "Project Zomboid",
-  "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10); javap/jar-verified",
-  "platform": "windows",
-  "engine": "java",
-  "route": "loader-api",
-  "tools": [
-   "javap (JDK)",
-   "zombie.network.* (296 packet classes)",
-   "ServerCommands.lua",
-   "dedicated server (Steam app 380870)"
-  ],
-  "anti_cheat": "none",
-  "status": "in-progress",
-  "agents": [
-   "Devin (SWE-2 Medium)"
-  ],
-  "humans": [
-   "Alistair-Afton"
-  ],
-  "date": "2026-10-12",
-  "links": [
-   "https://pzwiki.net/wiki/Networking"
-  ],
-  "tags": [
-   "b42",
-   "multiplayer",
-   "server",
-   "packets",
-   "sync",
-   "ownership",
-   "dedicated-server",
-   "co-op",
-   "networking",
-   "luanet"
-  ]
- },
- {
-  "path": "games/project-zomboid/b42-porting-creatures-from-other-games.md",
-  "kind": "game",
-  "title": "Porting whole creatures from other games into Build 42: three proven routes (original assets, converted assets, generated assets)",
+  "title": "Creatures in Build 42: monsters as dressed zombies, porting creatures from other games, other chassis, and how the NPC frameworks work",
   "game": "Project Zomboid",
   "games_also": [
    "Cry of Fear",
    "Half-Life",
    "Cataclysm: Dark Days Ahead"
   ],
-  "game_version": "Build 42.21.0 (Steam, Windows 10); routes verified in three live ports: CoF Monsters 0.68.25, HLMonsters 0.1.0, CDDA Ants",
+  "game_version": "Build 42.21.0 (Steam, Windows 10). A survey: the files of the Workshop mods named below (Cry of Fear Monsters 0.68.25 with versionMin=42.20, Bandits, CompanionDogs, ProjectALifeNPCs), a local-only Half-Life port, javap listings and the install's Lua; nothing was built or run in game for this note",
   "platform": "windows",
   "engine": "java",
   "route": "loader-api",
   "tools": [
    "Project Zomboid Lua (Kahlua) mod API",
-   "jassimp64 (assimp model loader in the game)",
+   "javap",
    "Blender + DirectX X importer",
-   "Crowbar/pymeshlab for source formats",
-   "fal (Meshy, ElevenLabs)"
+   "Paddlefruit rig / PY-BobBatchExportGLB.py",
+   "Crowbar (Half-Life .mdl)"
   ],
-  "anti_cheat": "none (single-player creature mods)",
-  "status": "in-progress",
-  "agents": [
-   "Devin (SWE-2 Medium)"
-  ],
-  "humans": [
-   "Alistair-Afton"
-  ],
-  "date": "2026-10-12",
-  "links": [],
-  "tags": [
-   "b42",
-   "creatures",
-   "monsters",
-   "cross-game-port",
-   "models",
-   "skinned-mesh",
-   "animations",
-   "animsets",
-   "ai",
-   "sounds",
-   "legal",
-   "houndeye",
-   "cry-of-fear"
-  ]
- },
- {
-  "path": "games/project-zomboid/b42-presentation-edge-cases-animscript-shaders-tiles-radio-media.md",
-  "kind": "game",
-  "title": "Build 42 presentation edge cases: animscript combat XML, shaders, spriteModels, seating, radio/TV, recorded media, music, fonts",
-  "game": "Project Zomboid",
-  "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10); verified against install media/ tree",
-  "platform": "windows",
-  "engine": "java",
-  "route": "loader-api",
-  "tools": [
-   "Project Zomboid Lua (Kahlua) mod API",
-   "media/ text formats"
-  ],
-  "anti_cheat": "none",
+  "anti_cheat": "none (single-player creature mods; the multiplayer note covers servers you host)",
   "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
@@ -4877,43 +4017,48 @@
   ],
   "date": "2026-10-12",
   "links": [
-   "https://pzwiki.net/wiki/Animation",
-   "https://pzwiki.net/wiki/Recorded_media"
+   "https://steamcommunity.com/sharedfiles/filedetails/?id=3268487204",
+   "https://steamcommunity.com/sharedfiles/filedetails/?id=3740052292",
+   "https://steamcommunity.com/sharedfiles/filedetails/?id=3803984183",
+   "https://pzwiki.net/wiki/Animation_guide"
   ],
   "tags": [
    "b42",
-   "animscript",
-   "actiongroups",
-   "animset-root",
-   "shaders",
-   "glsl",
-   "spritemodel",
-   "seating",
-   "cutaways",
-   "radio",
-   "recorded-media",
-   "tv",
-   "music",
-   "fonts",
-   "effects",
-   "tracers",
-   "gibs",
-   "voicestyles",
-   "presentation"
+   "creatures",
+   "custom-monster",
+   "zombies",
+   "clothing",
+   "bodylocation",
+   "persistent-outfit",
+   "animsets",
+   "animnode",
+   "animation-variables",
+   "spawning",
+   "outfits",
+   "cross-game-port",
+   "npc",
+   "survivors",
+   "companion",
+   "bandits",
+   "mannequin",
+   "thumpable",
+   "case-study"
   ]
  },
  {
-  "path": "games/project-zomboid/b42-script-system-items-recipes-entities-vehicles.md",
+  "path": "games/project-zomboid/b42-data-scripts-entities-skills-traits-media-files.md",
   "kind": "game",
-  "title": "Build 42 script system census: items, craftRecipes, entities, vehicles, traits, fluids - every block type",
+  "title": "Build 42 content as data: the script block census, entities and fluids, custom skills (perks.txt), traits, professions, challenges and media data files",
   "game": "Project Zomboid",
   "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10); block census counted on media/scripts of that install",
+  "game_version": "Build 42.21.0 (Steam, Windows 10). A survey: block counts from the install's media/scripts, javap listings of projectzomboid.jar, the install's Lua and media/ files; nothing was built or run in game for this note",
   "platform": "windows",
   "engine": "java",
   "route": "loader-api",
   "tools": [
    "Project Zomboid script system (media/scripts *.txt)",
+   "javap",
+   "media/perks.txt (CustomPerks)",
    "PZwiki ScriptsDocs"
   ],
   "anti_cheat": "none (data modding; no client patching)",
@@ -4927,7 +4072,9 @@
   "date": "2026-10-12",
   "links": [
    "https://pzwiki.net/wiki/Scripts",
-   "https://pzwiki.net/wiki/CraftRecipe_(scripts)"
+   "https://pzwiki.net/wiki/CraftRecipe_(scripts)",
+   "https://pzwiki.net/wiki/Entity_scripts",
+   "https://github.com/ZioPao/The-Only-Cure"
   ],
   "tags": [
    "b42",
@@ -4936,121 +4083,39 @@
    "recipes",
    "craftrecipe",
    "entities",
+   "components",
+   "fluids",
    "vehicles",
+   "weapons",
+   "perks",
+   "skills",
    "traits",
    "professions",
-   "fluids",
-   "models",
-   "sounds",
-   "fixing",
-   "mannequin",
-   "timedaction",
+   "survivorswap",
+   "challenges",
+   "radio",
+   "recorded-media",
+   "music",
+   "fonts",
+   "effects",
    "data-oriented"
   ]
  },
  {
-  "path": "games/project-zomboid/b42-survivor-npc-frameworks-bandits-companiondogs-alife.md",
+  "path": "games/project-zomboid/b42-java-surface-lua-callable-api-and-engine-internals.md",
   "kind": "game",
-  "title": "Survivor NPC frameworks in the wild: how Bandits programs zombies as people, CompanionDogs rides the raccoon chassis, and ProjectALife modularizes NPCs",
+  "title": "The Java surface of Build 42: Lua-callable methods on the key classes, and the AI, animation, audio, weather, body and damage internals behind them",
   "game": "Project Zomboid",
   "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10); mods: Bandits (workshop 3268487204), CompanionDogs (3740052292), ProjectALifeNPCs (3803984183)",
-  "platform": "windows",
-  "engine": "java",
-  "route": "loader-api",
-  "tools": [
-   "Bandits workshop mod (3268487204)",
-   "CompanionDogs (3740052292)",
-   "ProjectALifeNPCs (3803984183)"
-  ],
-  "anti_cheat": "none",
-  "status": "in-progress",
-  "agents": [
-   "Devin (SWE-2 Medium)"
-  ],
-  "humans": [
-   "Alistair-Afton"
-  ],
-  "date": "2026-10-12",
-  "links": [
-   "https://steamcommunity.com/sharedfiles/filedetails/?id=3268487204",
-   "https://steamcommunity.com/sharedfiles/filedetails/?id=3740052292",
-   "https://steamcommunity.com/sharedfiles/filedetails/?id=3803984183"
-  ],
-  "tags": [
-   "b42",
-   "npc",
-   "survivors",
-   "bandits",
-   "companion",
-   "ai-framework",
-   "zombie-chassis",
-   "raccoon",
-   "tasks",
-   "programs",
-   "interop"
-  ]
- },
- {
-  "path": "games/project-zomboid/b42-ui-framework-ispanel-windows-hud-radial-input.md",
-  "kind": "game",
-  "title": "The UI framework: ISUI widget library, custom windows and HUD, radial menus, 3D-model widgets, XUI skinning, input and controller",
-  "game": "Project Zomboid",
-  "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10); media/lua/client/ISUI census-verified (138 files)",
-  "platform": "windows",
-  "engine": "java",
-  "route": "loader-api",
-  "tools": [
-   "ISUI Lua framework (138 files in the shipped install)",
-   "ISXuiBuilder/ISXuiSkin",
-   "keyBinding table",
-   "OnMouse/OnKey events"
-  ],
-  "anti_cheat": "none",
-  "status": "in-progress",
-  "agents": [
-   "Devin (SWE-2 Medium)"
-  ],
-  "humans": [
-   "Alistair-Afton"
-  ],
-  "date": "2026-10-12",
-  "links": [
-   "https://pzwiki.net/wiki/Lua_(API)"
-  ],
-  "tags": [
-   "b42",
-   "ui",
-   "isui",
-   "hud",
-   "panels",
-   "windows",
-   "radial-menu",
-   "xui",
-   "skin",
-   "input",
-   "controller",
-   "widgets",
-   "3dmodel"
-  ]
- },
- {
-  "path": "games/project-zomboid/b42-weapons-ballistics-effects-vehicles-feedback.md",
-  "kind": "game",
-  "title": "Weapons, real ballistics, damage pipeline, effects and vehicle porting: the combat-output layer of Build 42",
-  "game": "Project Zomboid",
-  "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10); javap-verified",
+  "game_version": "Build 42.21.0 (Steam, Windows 10). A survey: javap listings of projectzomboid.jar and the install's Lua; names cross-checked against the unofficial 42.21.0 javadocs; nothing was built or run in game for this note",
   "platform": "windows",
   "engine": "java",
   "route": "loader-api",
   "tools": [
    "javap (JDK)",
-   "BallisticsController/Bullet (btBullet)",
-   "WorldSoundManager",
-   "ModelManager/ModelInstance",
-   "media/effects param files"
+   "PZ-Umbrella stubs",
+   "ZomboidDecompiler (Vineflower)",
+   "unofficial 42.21.0 javadocs (albion.codeberg.page/PZ-JavaDocs)"
   ],
   "anti_cheat": "none",
   "status": "in-progress",
@@ -5062,80 +4127,161 @@
   ],
   "date": "2026-10-12",
   "links": [
-   "https://pzwiki.net/wiki/Item_script_parameters"
+   "https://www.projectzomboid.com/modding/",
+   "https://albion.codeberg.page/PZ-JavaDocs/",
+   "https://github.com/PZ-Umbrella/Umbrella"
   ],
   "tags": [
    "b42",
-   "weapons",
-   "ballistics",
-   "damage",
-   "effects",
-   "tracers",
-   "vehicles",
-   "feedback",
-   "worldsound",
-   "attachments",
-   "dismember",
-   "explosions"
-  ]
- },
- {
-  "path": "games/project-zomboid/b42-weather-climate-internals-airmass-thunder-seasons.md",
-  "kind": "game",
-  "title": "Weather and climate internals: ClimateManager air-mass simulation, networked ThunderStorm, seasons, fog/night colors, per-square temperatures",
-  "game": "Project Zomboid",
-  "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10); javap/jar-verified (58 classes in zombie.iso.weather)",
-  "platform": "windows",
-  "engine": "java",
-  "route": "loader-api",
-  "tools": [
-   "javap (JDK)",
-   "getClimateManager() entry point",
-   "SandboxVars climate fields",
-   "media/lua/shared|client weather tables"
-  ],
-  "anti_cheat": "none",
-  "status": "in-progress",
-  "agents": [
-   "Devin (SWE-2 Medium)"
-  ],
-  "humans": [
-   "Alistair-Afton"
-  ],
-  "date": "2026-10-12",
-  "links": [
-   "https://pzwiki.net/wiki/Weather"
-  ],
-  "tags": [
-   "b42",
+   "api",
+   "cheat-sheet",
+   "javap",
+   "isozombie",
+   "isoplayer",
+   "isoanimal",
+   "isogridsquare",
+   "isocell",
+   "isoworld",
+   "isometagrid",
+   "bodydamage",
+   "stats",
+   "scriptmanager",
+   "basevehicle",
+   "ai",
+   "statemachine",
+   "pathfinding",
+   "animation",
+   "animator",
+   "audio",
+   "fmod",
    "weather",
    "climate",
-   "airmass",
-   "thunder",
-   "storm",
-   "seasons",
-   "temperature",
-   "fog",
-   "moon",
-   "simulation"
+   "damage",
+   "ballistics",
+   "worldsound",
+   "internals"
   ]
  },
  {
-  "path": "games/project-zomboid/b42-world-simulation-loot-stories-metazones-worldgen.md",
+  "path": "games/project-zomboid/b42-modding-orientation-layout-lua-runtime-tooling-interop-ui.md",
   "kind": "game",
-  "title": "Build 42 world simulation: loot distributions, random stories, metazones, WorldGen, basements, climate and meta events",
+  "title": "Build 42 modding orientation: mod anatomy, the Lua runtime, tooling, interop between mods and the ISUI framework",
   "game": "Project Zomboid",
   "games_also": [],
-  "game_version": "Build 42.21.0 (Steam, Windows 10); verified against media/lua/server + jar class census",
+  "game_version": "Build 42.21.0 (Steam, Windows 10). A survey: the install's media/ files and Lua, javap listings of projectzomboid.jar, and the files of the Workshop mods named below; nothing was built or run in game for this note",
   "platform": "windows",
   "engine": "java",
   "route": "loader-api",
   "tools": [
    "Project Zomboid Lua (Kahlua) mod API",
-   "javap / ZomboidDecompiler for the zombie.* packages"
+   "PZ-Umbrella EmmyLua stubs",
+   "demiurgeQuantified/ZomboidDecompiler (Vineflower)",
+   "javap",
+   "PZAPI.ModOptions",
+   "um win (game automation)"
   ],
-  "anti_cheat": "none (server-side simulation modding)",
+  "anti_cheat": "none in single player; mods are Lua and data the game loads itself. Dedicated servers run server-side checks, see the multiplayer note",
+  "status": "in-progress",
+  "agents": [
+   "Devin (SWE-2 Medium)"
+  ],
+  "humans": [
+   "Alistair-Afton"
+  ],
+  "date": "2026-10-12",
+  "links": [
+   "https://pzwiki.net/wiki/Modding",
+   "https://github.com/PZ-Umbrella/Umbrella",
+   "https://github.com/demiurgeQuantified/ZomboidDecompiler",
+   "https://www.projectzomboid.com/modding/",
+   "https://steamcommunity.com/sharedfiles/filedetails/?id=3403180543",
+   "https://steamcommunity.com/sharedfiles/filedetails/?id=3405043636",
+   "https://steamcommunity.com/sharedfiles/filedetails/?id=3813871509"
+  ],
+  "tags": [
+   "b42",
+   "orientation",
+   "mod-structure",
+   "lua",
+   "kahlua",
+   "events",
+   "timed-actions",
+   "context-menu",
+   "ui",
+   "isui",
+   "modoptions",
+   "translations",
+   "debug",
+   "tooling",
+   "testing",
+   "interop",
+   "load-order",
+   "compat",
+   "workshop"
+  ]
+ },
+ {
+  "path": "games/project-zomboid/b42-multiplayer-internals-packets-gameserver-sync.md",
+  "kind": "game",
+  "title": "Build 42 multiplayer for modders: commands, transmit and sync verbs, ownership, server anti-cheat, the packet layer and the population manager",
+  "game": "Project Zomboid",
+  "games_also": [],
+  "game_version": "Build 42.21.0 (Steam, Windows 10). A survey: javap listings of zombie.network and zombie.popman, the install's Lua and other mods' files; no server was run for this note",
+  "platform": "windows",
+  "engine": "java",
+  "route": "loader-api",
+  "tools": [
+   "javap (JDK)",
+   "zombie.network / zombie.popman packages",
+   "vanilla ServerCommands.lua",
+   "dedicated server (Steam app 380870)"
+  ],
+  "anti_cheat": "B42 dedicated servers run server-side checks (zombie.network.anticheats, switched by the ServerOptions antiCheat* settings); this note is about servers you host, and a mod that changes state on a client can trip them",
+  "status": "in-progress",
+  "agents": [
+   "Devin (SWE-2 Medium)"
+  ],
+  "humans": [
+   "Alistair-Afton"
+  ],
+  "date": "2026-10-12",
+  "links": [
+   "https://pzwiki.net/wiki/Networking",
+   "https://albion.codeberg.page/PZ-JavaDocs/"
+  ],
+  "tags": [
+   "b42",
+   "multiplayer",
+   "server",
+   "dedicated-server",
+   "co-op",
+   "networking",
+   "commands",
+   "sync",
+   "ownership",
+   "moddata",
+   "anti-cheat",
+   "packets",
+   "popman"
+  ]
+ },
+ {
+  "path": "games/project-zomboid/b42-world-loot-stories-zones-tiles-maps-worldgen.md",
+  "kind": "game",
+  "title": "The Build 42 world for modders: loot and foraging, world stories, zones, persistent world systems, tiles and moveables, map files, worldgen and basements",
+  "game": "Project Zomboid",
+  "games_also": [],
+  "game_version": "Build 42.21.0 (Steam, Windows 10). A survey: the install's media/ files and Lua (media/lua/server, shared and client), the media/maps folders and javap listings; nothing was built or run in game for this note",
+  "platform": "windows",
+  "engine": "java",
+  "route": "loader-api",
+  "tools": [
+   "Project Zomboid Lua (Kahlua) mod API",
+   "javap",
+   "TileZed/WorldEd community forks",
+   "in-game world map editor (ISUI/Maps/Editor)"
+  ],
+  "anti_cheat": "none (single player and servers you host)",
   "status": "in-progress",
   "agents": [
    "Devin (SWE-2 Medium)"
@@ -5146,25 +4292,33 @@
   "date": "2026-10-12",
   "links": [
    "https://pzwiki.net/wiki/ProceduralDistributions",
-   "https://pzwiki.net/wiki/Distributions"
+   "https://pzwiki.net/wiki/Tile_properties",
+   "https://pzwiki.net/wiki/Mapping"
   ],
   "tags": [
    "b42",
+   "world",
    "loot",
    "distributions",
-   "proceduraldistributions",
+   "foraging",
    "world-stories",
    "metazones",
-   "metagrid",
    "zones",
+   "global-objects",
+   "farming",
+   "fishing",
+   "tiles",
+   "tiledef",
+   "moveables",
+   "seating",
+   "spritemodels",
+   "maps",
+   "map-mods",
+   "stashes",
+   "worldmap",
    "worldgen",
    "basements",
-   "climate",
-   "weather",
-   "meta-events",
-   "helicopter",
-   "ai-director",
-   "java-internals"
+   "erosion"
   ]
  },
  {
