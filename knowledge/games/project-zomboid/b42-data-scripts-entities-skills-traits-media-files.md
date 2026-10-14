@@ -1,13 +1,13 @@
 ---
 kind: game
-title: 'Build 42 script system census: items, craftRecipes, entities, vehicles, traits, fluids - every block type'
+title: 'Build 42 content as data: the script block census, entities and fluids, custom skills (perks.txt), traits, professions, challenges and media data files'
 game: Project Zomboid
 games_also: []
-game_version: 'Build 42.21.0 (Steam, Windows 10); block census counted on media/scripts of that install'
+game_version: 'Build 42.21.0 (Steam, Windows 10). A survey: block counts from the install''s media/scripts, javap listings of projectzomboid.jar, the install''s Lua and media/ files; nothing was built or run in game for this note'
 platform: windows
 engine: java
 route: loader-api
-tools: ["Project Zomboid script system (media/scripts *.txt)", "PZwiki ScriptsDocs"]
+tools: ["Project Zomboid script system (media/scripts *.txt)", javap, "media/perks.txt (CustomPerks)", "PZwiki ScriptsDocs"]
 anti_cheat: 'none (data modding; no client patching)'
 status: in-progress
 agents:
@@ -17,176 +17,265 @@ date: '2026-10-12'
 links:
 - "https://pzwiki.net/wiki/Scripts"
 - "https://pzwiki.net/wiki/CraftRecipe_(scripts)"
-tags: [b42, scripts, items, recipes, craftrecipe, entities, vehicles, traits, professions, fluids, models, sounds, fixing, mannequin, timedaction, data-oriented]
+- "https://pzwiki.net/wiki/Entity_scripts"
+- "https://github.com/ZioPao/The-Only-Cure"
+tags: [b42, scripts, items, recipes, craftrecipe, entities, components, fluids, vehicles, weapons, perks, skills, traits, professions, survivorswap, challenges, radio, recorded-media, music, fonts, effects, data-oriented]
 ---
-# Build 42 script system census: items, craftRecipes, entities, vehicles, traits, fluids - every block type
+# Build 42 content as data: script blocks, entities and fluids, skills, traits and media files
 
-> Build 42 defines almost all game content in `media/scripts/**/*.txt` block files - no Lua needed for items,
-> recipes, craft stations, vehicles, traits, professions, fluids, sounds or models. This note is a census of every
-> top-level block type in a 42.21.0 install (counts included so you can judge how "supported" a feature is),
-> the syntax patterns they share, and which vanilla file to copy per content type. Read after
-> `b42-modding-anatomy-...md`.
+> Build 42 defines almost all content in `media/scripts/**/*.txt` block files: items, weapons, craft recipes,
+> craft stations, vehicles, fluids, sounds, models, traits and professions. Custom skills are a `media/perks.txt`
+> file, and radio shows, CDs, music and fonts are data too. This note is a census of the block types in a
+> 42.21.0 install, the syntax they share, the entity/component system behind `entity` blocks, and the character
+> data (skills, traits, professions, play-as and challenges). It's a survey: nothing was built and run in game.
+> Start with the [orientation note](b42-modding-orientation-layout-lua-runtime-tooling-interop-ui.md).
 
 ## Setup
-- Project Zomboid **42.21.0**, Steam, Windows 10. Census: `media/scripts/` of the install - `entities/` (239
-  craft-station/world entities), `generated/` (items, recipes, characters, sounds, vehicles, weapons, physics),
-  `ragdolls/`, `xui/` (UI skins).
-- Mods add the same blocks from `media/scripts/*.txt` inside their own `common/` or version folder; a mod script
-  uses `module Base` to share the vanilla namespace or its own `module MyMod` for namespaced ids
-  (`MyMod.MyItem`). `imports { Base }` inside a module pulls vanilla blocks for `base:` type references.
+- Project Zomboid **42.21.0**, Steam, Windows 10. Census of the install's `media/scripts/`: `entities/` (craft
+  stations and world entities), `generated/` (items, recipes, characters, sounds, vehicles, weapons, physics),
+  `ragdolls/`, `xui/`.
+- A mod adds the same blocks in its own `media/scripts/*.txt`, inside `module Base { }` (the vanilla namespace)
+  or its own `module MyMod { }` (ids become `MyMod.Thing`). `imports { Base }` inside a module lets it refer to
+  vanilla blocks and `base:` tags.
 
 ## Route and why
-Data-only modding. Before writing any Lua, check whether your content is a script block: items, recipes,
-stations, vehicles, sounds, models, traits and professions are pure data in B42. Lua is only for *behaviour*.
+Data first. Before writing Lua, check whether the content is a script block; Lua is for behaviour only.
 
-## How the game works
+## How the game works (what we had to learn)
 
-### Block census (42.21.0 install, `media/scripts`)
-| Block | ~Count | What it is | Vanilla files to copy |
+### Block census (42.21.0 install, approximate counts)
+| Block | Count | What it is | Vanilla files to copy |
 |---|---|---|---|
-| `item` | 5105 | Every inventory item | `generated/items/{weapon,food,clothing,drainable,container,literature,normal,...}.txt` |
-| `model` | 3835 | Model entries (mesh + shader + animationsMesh) | `generated/vehicles/*_model.txt`, HLMonsters `model_houndeye.txt` |
-| `sound` | 3038 | Named sounds w/ 3D falloff, categories, clip variants | `generated/sounds/**` |
-| `craftRecipe` | 969 | New B42 crafting recipes | `generated/recipes/recipes_*.txt` |
-| `xuiSkin` | 254 | Skins for the entity UI system | `entities/**/entity_*_xuiSkin.txt`, `scripts/xui/` |
-| `vehicle` | 241 | Vehicles incl. templates | `generated/vehicles/` + `template_*.txt` |
-| `entity` | 239 | B42 placeable workstations/objects with components | `entities/<domain>/workstations/*.txt` |
-| `timedAction` | 119 | Script-declared timed actions | `generated/...`, `shared/TimedActions` Lua |
-| `character_trait_definition` | 97 | Traits (cost, exclusions, XP boosts, granted recipes) | `generated/characters/character_traits.txt` |
-| `physicsShape` | 90 | Physics colliders | `generated/physics/` |
-| `template` | 77 | Reusable block templates | `vehicles/template_*.txt` |
-| `animationsMesh` | 75 | Maps model -> animation folder/prefix | `model_*.txt` files, HLMonsters example |
-| `ragdoll` | 66 | Ragdoll definitions | `scripts/ragdolls/` |
-| `evolvedrecipe` | 63 | Cooking evolved recipes (add ingredients) | `generated/recipes/` |
-| `fluid` | 61 | B42 fluid types | `generated/` (search `fluid `) |
-| `mannequin` | 30 | Mannequin outfits | `generated/` |
-| `fixing` | 29 | Item repair recipes | `generated/` (search `fixing `) |
-| `character_profession_definition` | 25 | Professions | `generated/characters/character_professions.txt` |
-| `physicsHitReaction` | 10 | Physics hit reactions | `generated/physics/` |
-| `clock`, `energy`, `soundTimeline`, `vehicleEngineRPM`, `animation`, `xuiConfig` | ~20 | Misc subsystems | scattered |
-| | | Also seen: `module`, `imports`, `mappers`/`itemMapper` sub-blocks | |
+| `item` | 5105 | every inventory item | `generated/items/{weapon,food,clothing,drainable,container,literature,normal,...}.txt` |
+| `model` | 3835 | mesh + texture + shader + `animationsMesh` | `generated/vehicles/*_model.txt` and other `model_*.txt` |
+| `sound` | 3038 | named sounds: category, 3D falloff, clip variants | `generated/sounds/**` |
+| `craftRecipe` | 969 | B42 crafting recipes (replaces B41 `recipe`) | `generated/recipes/recipes_*.txt` |
+| `xuiSkin` | 254 | skins for the entity UI | `entities/**/entity_*_xuiSkin.txt`, `xui/` |
+| `vehicle` | 241 | vehicles, including templates | `generated/vehicles/`, `template_*.txt` |
+| `entity` | 239 | placeable workstations and objects built from components | `entities/<domain>/...` |
+| `timedAction` | 119 | script-declared timed actions | `generated/`, with Lua in `TimedActions/` |
+| `character_trait_definition` | 97 | traits | `generated/characters/character_traits.txt` |
+| `physicsShape` | 90 | physics colliders | `generated/physics/` |
+| `template` | 77 | reusable block templates | `vehicles/template_*.txt` |
+| `animationsMesh` | 75 | binds a model to an animation folder and prefix | `model_*.txt` files |
+| `ragdoll` | 66 | ragdoll definitions | `ragdolls/` |
+| `evolvedrecipe` | 63 | add-ingredient cooking (soups, stir fry) | `generated/recipes/` |
+| `fluid` | 61 | B42 fluid types | search `generated/` for `fluid ` |
+| `mannequin` | 30 | mannequin outfits and poses | `generated/` |
+| `fixing` | 29 | item repair recipes | search `generated/` for `fixing ` |
+| `character_profession_definition` | 25 | professions | `generated/characters/character_professions.txt` |
 
-### Shared syntax patterns
-- **Block = `name Id { key = value, ... }`** inside `module X { }`. Values with `;` are lists.
-- **Item references**: `[Base.Axe;Base.Saw]` explicit list; `tags[base:saw;base:crudesaw]` any item whose
-  `Tags` include those; `mapper:name` output resolved through an `itemMapper name { Out = In, default = ... }`.
-- **Recipe flags on inputs**: `mode:keep` (tool isn't consumed) vs `mode:destroy`/default consumed;
-  `flags[Prop1;Prop2]` = which hand/hotbar slot the ingredient takes in the craft UI;
-  `flags[MayDegradeLight]` small condition loss; `flags[InheritCondition]` output inherits input condition.
-- **`template! = Name`** = inherit a `template` block and override keys (vehicle variants use this heavily).
-- **Icons**: `Icon = Foo` resolves `media/textures/Item_Foo.png`; `IconsForTexture` lists variants.
-- Every display string is a translation key (`DisplayName = ItemName_Base.Axe`, `Tooltip`, `UIName`) resolved
-  via `media/lua/shared/Translate/<LANG>/*.json` (see the Lua/runtime note).
+Also present in small numbers: `physicsHitReaction`, `clock`, `energy`, `soundTimeline`, `vehicleEngineRPM`,
+`animation`, `xuiConfig`, and `itemMapper` sub-blocks. `media/items/items.xml` is a generated registry, not
+the authoring format.
 
-### Anatomy per block (what modders actually write)
-**item** - type via `ItemType = base:weapon|food|clothing|drainable|normal|...`; combat stats for weapons
-(`MaxDamage`, `MinRange/MaxRange`, `SwingAnim`, `Categories = base:blunt`, `DamageCategory = Slash`,
-`CriticalChance`, `KnockdownMod`, `ConditionMax`/`ConditionLowerChanceOneIn`); sounds as `HitSound`, `SwingSound`,
-`BreakSound`, `DropSound`; behaviour tags (`Tags`, `DisplayCategory`, `Weight`, `ClothingItem`,
-`BodyLocation`, `AttachmentType` for hotbar slots, `EatType`, `PourType`, `ReplaceOnUse`, `UseDelta`).
+### Shared syntax
+- A block is `name Id { key = value, ... }` inside `module X { }`; `;` separates list values.
+- Item references: `[Base.Axe;Base.Saw]` is an explicit list; `tags[base:saw;base:crudesaw]` means any item whose
+  `Tags` include one of them; `mapper:name` resolves the output through an `itemMapper` block with a `default`.
+- Recipe input flags: `mode:keep` (a tool, not consumed) vs `mode:destroy` or the default (consumed);
+  `flags[Prop1]`/`flags[Prop2]` pick the hand slot in the craft UI, `MayDegradeLight` costs a little condition,
+  `InheritCondition` passes condition to the output.
+- `template! = Name` inherits a `template` block and overrides keys (vehicle variants use it heavily).
+- `Icon = Foo` resolves `media/textures/Item_Foo.png`. Display strings are translation keys
+  (`DisplayName`, `Tooltip`, `UIName`).
 
-**craftRecipe** (B42 format - replaces B41 `recipe`):
+A recipe in the vanilla shape (ids made up):
 ```
-craftRecipe SawLogs {
-  timedAction = SawLogs,         -- links to a timedAction script/Lua class
-  time = 230,                    -- action length
-  Tags = InHandCraft;CanBeDoneFromFloor,
-  category = Carpentry,          -- craft UI tab
-  xpAward = Woodwork:5,
-  inputs { item 1 [Base.Log] flags[Prop2],
-           item 1 tags[base:saw] mode:keep flags[MayDegradeLight;Prop1], }
-  outputs { item 3 Base.Plank, }
+module MyMod {
+  imports { Base }
+  craftRecipe SawHardwood {
+    timedAction = SawLogs,
+    time = 300,
+    Tags = InHandCraft;CanBeDoneFromFloor,
+    category = Carpentry,
+    xpAward = Woodwork:8,
+    inputs {
+      item 1 [MyMod.HardwoodLog] flags[Prop2],
+      item 1 tags[base:saw] mode:keep flags[MayDegradeLight;Prop1],
+    }
+    outputs {
+      item 4 MyMod.HardwoodPlank,
+    }
+  }
 }
 ```
-`itemMapper` blocks map input->output variants (SawLongStick maps LongStick->WoodenStick2, Sapling->TreeBranch2,
-with `default`). Recipes on a station list in the entity's `CraftBench` component instead of being global.
+`timedAction` names a `timedAction` block (here a vanilla one); `category` is the craft UI tab. Recipes that
+belong to a station are listed in that entity's `CraftBench` component instead of being global.
 
-**entity** - B42's component-based placeables:
+### Items, weapons and vehicles
+- **Items:** `ItemType = base:weapon|food|clothing|drainable|normal|...`, `Weight`, `DisplayCategory`, `Tags`,
+  `ClothingItem` + `BodyLocation` (clothing), `AttachmentType` (hotbar slot), `EatType`, `PourType`,
+  `ReplaceOnUse`, `UseDelta`, `WorldStaticModel` (the model on the ground).
+- **Weapons** are items: damage (`MinDamage`/`MaxDamage`), reach (`MinRange`/`MaxRange`), `BaseSpeed`,
+  `CriticalChance`, `KnockdownMod`, `PushBackMod`, condition (`ConditionMax`, `ConditionLowerChanceOneIn`),
+  `Categories`, `SwingAnim`/`IdleAnim`/`RunAnim`, and sounds (`SwingSound`, `HitSound`, `BreakSound`,
+  `EquipSound`, `BringToBearSound` ...), plus ammo, magazine and fire-mode fields for guns. There are no new
+  damage types: a special attack is an existing damage path plus Lua (Java-surface note).
+- **Vehicles:** `model { file, scale, offset }` pointing at a `model` block, `skin { texture }` (several = paint
+  jobs, PNGs in `media/textures/Vehicles/`), `extents`, `mass`, `centerOfMassOffset`, `physicsChassisShape`,
+  shadow, `attachment` (trailer, seats, doors), `crawlThroughWheel`, and `template! = ...` for parts, engine and
+  sounds (`template_*.txt`, `vehicleEngineRPM`). Part ids such as `Engine`, `GasTank` and the door parts drive
+  the mechanics Lua in `client/Vehicles`: rename meshes freely, keep the part ids (the
+  [vehicle-port technique note](../../techniques/porting-a-vehicle-semantic-traps.md)
+  covers the semantics side of a port).
+
+### Entities: the B42 component runtime
+- `entity` blocks build **`GameEntity`** objects from components. The runtime is the `zombie.entity` package
+  (`GameEntityManager`, `GameEntityNetwork` for MP sync, `MetaEntity`/`MetaEntitySystem` for entities in unloaded
+  chunks, `EntityBucket` batching, `ComponentScriptFactory`). It is not `zombie.characters.ecs`, which is a
+  small scaffold on characters (five public classes).
+- Component packages in `zombie.entity.components`: `attributes`, `build` (`BuildLogic`), `combat`
+  (`Durability`), `contextmenuconfig`, `crafting` (`CraftBench`, `CraftLogic`, `FurnaceLogic`, `DryingLogic`,
+  `MashingLogic`), `fluids` (`FluidContainer`, `FluidType`, `PoisonEffect` ...), `lua` (`LuaComponent`), `parts`,
+  `resources` (`Resource`, `ResourceChannel`, `LogisticsSystem`), `signals`, `sounds`, `spriteconfig`, `ui`.
+  Components are Java types; a mod composes them in script data and adds behaviour through `LuaComponent`.
+- An entity in the vanilla shape (ids made up):
 ```
-entity Charcoal_Burner_MetalDrum {
-  component UiConfig { xuiSkin = default, entityStyle = ES_Charcoal_Burner, uiEnabled = true, }
-  component CraftBench { Recipes = WoodCharcoal, }
+entity MyMod_SmokerDrum {
+  component UiConfig { xuiSkin = default, entityStyle = ES_MyMod_SmokerDrum, uiEnabled = true, }
+  component CraftBench { Recipes = MyMod_SmokeMeat, }
   component SpriteConfig { health = 100, skillBaseHealth = 20,
-    face SINGLE { layer { row = crafted_02_51, } } }
-  component CraftRecipe { timedAction = BuildLowNoTool, time = 50, category = Blacksmithing,
-    Tooltip = Tooltip_craft_charcoalBurnerDesc,
-    inputs { item 1 [Base.MetalDrum], item 4 [Base.Stone2], } }
+    face SINGLE { layer { row = mymod_smoker_01_0, } } }
+  component CraftRecipe { timedAction = BuildLowNoTool, time = 50, category = Cooking,
+    Tooltip = Tooltip_MyMod_SmokerDrum,
+    inputs { item 1 [Base.MetalDrum], item 2 [MyMod.WireRack], } }
 }
 ```
-Components seen: `UiConfig`, `CraftBench`, `SpriteConfig` (health + which sprite rows per facing),
-`CraftRecipe` (what building it costs), plus fluid-container, feeding-trough and workstation components in
-`entities/` subfolders (agricultural, animals, appliances, barricades, blacksmith, fences_low, furniture,
-misc, outdoors, pottery, stairs, walls). An entity pairs its `entity` script with an `entity_*_xuiSkin.txt`
-for the interaction UI and an `entityStyle` in the xui skin files.
+  `SpriteConfig` names the sprite per facing, `CraftRecipe` is what building it costs, `CraftBench` lists the
+  recipes it runs. Each vanilla entity pairs its `entity` file with an `entity_*_xuiSkin.txt` that defines the
+  `entityStyle`. The vanilla `entities/` folders (agricultural, animals, appliances, barricades, blacksmith,
+  fences_low, furniture, misc, outdoors, stairs, walls) are the only schema reference: copy the closest one.
+- **Fluids:** a `fluid` block defines the type; containers and food declare capacity and contents. The
+  `FluidContainer` API: `addFluid`, `adjustAmount`, `canAddFluid`, `getAmount`, `getCapacity`,
+  `getFreeCapacity`, `getPrimaryFluid`, `getRainCatcher`, `getPoisonEffect`/`getPoisonRatio`, `copyFluidsFrom`,
+  `CanTransfer`/`Transfer`, `Empty`. Fluids mix, have colours and can be poisonous; `ISFluidContainerMenu` is the
+  vanilla UI.
+- When to use what: an `entity` for interactive objects that stock components cover (it saves and syncs);
+  a global-object system for behaviour no component covers (world note); a plain item for anything without a
+  world presence.
 
-**vehicle** - `model { file, scale, offset }`, `skin { texture }` (multiple = paint skins), `extents`,
-`mass`, `centerOfMassOffset`, `physicsChassisShape`, `shadowExtents/Offset`, `attachment trailer|trailerfront|
-seat|door...` with offset/rotate/zoffset, `crawlThroughWheel FrontLeft|...` (front, offset, radius, width),
-`template! = CarNormal` to clone a base template. Parts/engine/sounds come from `template_*.txt` +
-`vehicleEngineRPM` blocks; skins are `media/textures/Vehicles/` PNGs.
+### Characters: custom skills, traits, professions
+- **Custom skills are data.** `CustomPerks` (with `CustomPerk`: `id`, `parent`, `passive`, `translation`, `xp`)
+  loads `media/perks.txt`. B42 mods ship it, e.g. The Only Cure's `42/media/perks.txt`. The shape:
+```
+VERSION = 1,
 
-**character_trait_definition / character_profession_definition** - `Cost` (negative = gives points),
-`MutuallyExclusiveTraits = base:x;base:y`, `XPBoosts = Skill=level`, `GrantedRecipes = A;B`,
-`IsProfessionTrait`, `DisabledInMultiplayer`, `UIName`/`UIDescription` (`UI_trait_*` translation keys).
-Professions add `FreeClothing`, spawn points, starting items.
+perk MyMod_Beekeeping
+{
+    parent = Survivalist,
+    translation = MyMod_Beekeeping,
+    passive = false,
+    xp1 = 75, xp2 = 150, xp3 = 300, xp4 = 750, xp5 = 1500,
+    xp6 = 3000, xp7 = 4500, xp8 = 6000, xp9 = 7500, xp10 = 9000,
+}
+```
+  `parent` is the skills-panel category (a parent of `None` makes a new category, as The Only Cure does).
+- **The Java route** is `PerkFactory.AddPerk(perk, name, [parent,] xp1, ..., xp10 [, passive])`: four overloads,
+  each with **10** ints. `PerkFactory.Perk` has `getXp1`...`getXp10`, `getXpForLevel` and `getTotalXpForLevel`,
+  so the ints are the XP for each level, as in perks.txt. Use perks.txt unless the values must be computed.
+- Registered perks show up in the skills panel (`ISCharacterInfo`, `ISPlayerStatsUI` read `PerkFactory`).
+  Levels: `getPerkLevel(perk)`, `setPerkLevelDebug(perk, n)`; XP: `getXp():AddXP(perk, amount)`. A perk does
+  nothing by itself: your Lua reads the level and applies the effect.
+- **Traits and professions** are `character_trait_definition` (cost, `MutuallyExclusiveTraits`, `XPBoosts`,
+  `GrantedRecipes`, `IsProfessionTrait`, `DisabledInMultiplayer`, `UIName`/`UIDescription`) and
+  `character_profession_definition` (adds free clothing and starting items) blocks. In 42.21 Lua checks a trait
+  with `player:hasTrait(trait)`, where `trait` is a `CharacterTrait` (constants such as `CharacterTrait.ATHLETIC`,
+  lookup with `CharacterTrait.get`), and reads or edits the set through `player:getCharacterTraits()`
+  (`getKnownTraits`, `add`, `remove`, `set`). Stock trait effects are hard-coded; a custom trait's effect is
+  your Lua. The creation screen is `client/OptionScreens/CharacterCreationProfession.lua`.
+- **Play as someone else:** `media/lua/shared/NPCs/SurvivorSwap.lua` is a vanilla table behind the debug
+  "Survivor Swap" menu. `SurvivorSwap.applyCharacter(player, data)` rewrites name, profession, traits, perk levels
+  (through `setPerkLevelDebug`), weight, sex, voice (type, pitch, prefix), hair, beard and skin, then calls
+  `resetModel()`. `SurvivorSwap.Survivors` and `Loadouts` are tables a mod can extend.
+- **Challenges** (`media/lua/client/LastStand/`): a Lua table registered with `addChallenge(table)`, with hooks
+  such as `OnGameStart` and `OnInitWorld` (which overwrites `SandboxVars`) and a same-named `.png` thumbnail.
+  Vanilla examples: `AReallyCDDAy` blows up a room at spawn with
+  `IsoFireManager.explode(getCell(), square, 100000)`; `WinterIsComing.lua`, `28MinutesLater.lua` and
+  `TopOfTheWorld.lua` show the other hooks.
 
-**fluid** - B42's liquid system (beverages, mixtures, containers); `evolvedrecipe` - soup/stir-fry style
-cooking additions; `fixing` - repair recipes (`require`, `fixer`, `globalItem`); `mannequin` - outfit display
-entities; `timedAction`/`animation`/`soundTimeline` - script-side declarations consumed by the
-`media/lua/shared|client/TimedActions` Lua classes.
-
-### items.xml
-`media/items/items.xml` is a flat registry the game generates/reads - not the authoring format. Author in
-script blocks; ignore it.
+### Media data files
+- **Radio and TV:** `media/radio/RadioData.xml` drives every broadcast: `VoiceEntry` (speaker id and colour),
+  `Adverts`, and per-channel `ScriptEntry` blocks (`startdelay`, `loopmin`/`loopmax`) of `BroadcastEntry` items
+  with a `day` index (how broadcasts run out as the apocalypse goes on) and `LineEntry` lines. Dynamic channels
+  (the weather report) are Lua in `server/radio/ISDynamicRadio.lua`; text lives in `RadioData.json` and
+  `DynamicRadio.json`.
+- **Recorded media (CDs, VHS):** `media/lua/shared/RecordedMedia/recorded_media.lua` is a generated table of
+  `RecMedia["<guid>"] = { title, author, category = "CDs"|..., spawning, lines = { { text, r, g, b, codes } } }`
+  where every string is an `RM_<guid>` translation key. Line `codes` such as `LEAR...` grant skill XP while
+  watching. A custom tape = a new entry, its `RM_` keys and an item that references the GUID.
+- **Music:** `media/lua/client/Music/MusicChoices.lua` scores tracks against a drama value (from the visible and
+  chasing zombie counts); `media/music/luatriggered/` holds cues that only play when Lua triggers them; same-named
+  files replace the menu theme.
+- **Fonts and effects:** `media/*.fnt` with `*_0.png` pages are AngelCode bitmap fonts; `media/effects/*.txt`
+  are key-value parameter files for bullet tracers and similar effects; `media/shaders/` holds GLSL pairs plus a
+  `README-Shaders.txt` on the GL 2.1 fallback (whether a mod can override a shader is untested). Videos are
+  Bink (`.bik`).
 
 ## Build steps
-1. Decide the block type; find the nearest vanilla file in `media/scripts/generated/` (or `entities/` for
-   stations) and copy its shape into `media/scripts/mymod_<thing>.txt`.
-2. Use your own `module` for namespaced ids, or `module Base` to merge into the vanilla namespace (needed when
-   vanilla systems must find it by unqualified name, e.g. `Base.MyItem` still works via module prefix).
-3. Add translation keys (`ItemName_`, `Recipes_`, `Tooltip_`, `UI_trait_`, `Sandbox_`) in
-   `media/lua/shared/Translate/EN/*.json`.
-4. Icons/textures under `media/textures/` with the `Item_` prefix convention.
-5. Launch `-debug`; script parse errors land in `console.txt` with file+line. Hot-reload scripts from the debug
-   menu where supported; otherwise restart.
+1. Pick the block type, copy the nearest vanilla file's shape into `media/scripts/mymod_<thing>.txt` under your
+   own `module` (or `module Base` when vanilla code must find it by its plain name).
+2. Translation keys (`ItemName_`, `Tooltip_`, `UI_trait_`, `Sandbox_` ...) in
+   `media/lua/shared/Translate/EN/*.json`; icons as `media/textures/Item_<Name>.png`.
+3. A station: an `entity` block and its `xuiSkin` file, copied as a pair from the closest vanilla entity.
+4. A skill: `media/perks.txt`; read its level from Lua where it should matter.
+5. Launch with `-debug` and read `console.txt`: script errors name the module, block and line.
 
 ## Verification
-- `console.txt` script errors are precise (module, block, key). A failed block usually kills only that file's
-  remaining blocks.
-- Craft recipes: check the crafting UI tab named by `category`; entities: `ES_*` styles must exist or the
-  entity UI is blank; vehicles: `-debug` vehicle editor/spawner.
-- Not verified: hand-building a `xuiSkin` from scratch (copied vanilla skins only); `clock`/`energy` blocks'
-  mod-facing use.
+- Survey only. Read on 42.21.0: the `media/scripts` block counts, the vanilla `entities/` tree,
+  `SurvivorSwap.lua`, the `LastStand` challenges, `RadioData.xml`, `recorded_media.lua`, `MusicChoices.lua`, and
+  javap listings of `zombie.entity`, `PerkFactory` and `CustomPerks`.
+- At review time the Java names were checked against the unofficial 42.21.0 javadocs
+  (albion.codeberg.page/PZ-JavaDocs), and the perks.txt shape against The Only Cure's `42/media/perks.txt`.
+- Not verified: anything in game. Not tried: a new entity from scratch, a custom `xuiSkin`, `LuaComponent`'s
+  script grammar, a perks.txt skill, a custom radio channel or CD, `clock`/`energy` blocks.
 
 ## Gotchas
-1. **Recipe doesn't show in UI.** Cause: missing `category` translation key or `Tags` gating
-   (`InHandCraft`/`CanBeDoneFromFloor` vs bench-only). Fix: give the category a `Recipes_*`/UI translation and
-   check tags match where you want it craftable.
-2. **Tool got consumed.** Cause: no `mode:keep`. Fix: `item 1 tags[base:saw] mode:keep ...`.
-3. **Output is wrong variant.** Cause: mappers need the input listed in `mappers[...]` AND an `itemMapper`
-   block with `default`; unmapped inputs fall through to default.
-4. **Icon invisible.** `Icon = X` needs `media/textures/Item_X.png`; world model needs
-   `WorldStaticModel = ` pointing at a `model` block or ground sprite.
-5. **`base:` tag references fail from a custom module** without `imports { Base }`.
-6. **Vehicle spawns as a cube.** `model.file` must reference a `model` block (`Vehicles_X`), which points at
-   `mesh = vehicles/...` in `models_X`; scale mismatch (vanilla uses `scale = 0.01` on meshes, `scale = 1.82`
-   on the vehicle model block) distorts collision.
-7. **Entity builds but has no UI.** `component UiConfig` needs a valid `entityStyle` defined in the xui skin
-   files; copy a vanilla `entity_*_xuiSkin.txt` pair, not just the `entity` block.
-8. **Trait does nothing.** `CharacterTrait = base:x` is the trait id the Lua/perk system checks; `UIName` is
-   only display. Mod effects still need Lua (`player:getTraits():contains("x")` or `HasTrait`).
-9. **Overriding a vanilla item**: redeclaring `item Base.Foo` in `module Base` overrides loaded fields - last
-   load order wins; safer to patch values at `OnGameBoot` via `getScriptManager():getItem(...)`.
-10. **Fluids need both ends**: a `fluid` block AND container/food items declaring fluid capacity + the
-    `fluids` item field; copying just one half shows an empty container that can't fill.
+1. **A recipe doesn't show in the craft UI.** Cause: a missing translation for its `category`, or `Tags` that
+   don't allow where you craft (`InHandCraft`, `CanBeDoneFromFloor` vs bench-only). Fix: add the key; check the
+   tags.
+2. **The tool got consumed.** Cause: no `mode:keep`. Fix: `item 1 tags[base:saw] mode:keep ...`.
+3. **The wrong output variant.** Cause: the input isn't listed in the recipe's mapper, so it falls through to the
+   `itemMapper`'s `default`. Fix: map every input.
+4. **`base:` tags fail in your module.** Cause: no `imports { Base }`. Fix: add it.
+5. **The item icon is invisible.** Cause: `Icon = X` without `media/textures/Item_X.png`. On the ground it also
+   needs a `WorldStaticModel` pointing at a `model` block.
+6. **A vehicle spawns as a cube or with odd collision.** Cause: `model.file` must name a `model` block that
+   points at the mesh, and the scales differ between the mesh and the vehicle model block in vanilla. Fix: copy a
+   vanilla vehicle's model/script pair and change one thing at a time.
+7. **An entity builds but has no UI.** Cause: its `entityStyle` isn't defined in an xui skin file. Fix: copy the
+   vanilla `entity` + `entity_*_xuiSkin.txt` pair together.
+8. **A trait does nothing.** Cause: stock trait effects are hard-coded to the vanilla traits. Fix: your Lua checks
+   `player:hasTrait(trait)` and applies the effect.
+9. **Redeclaring a vanilla item doesn't stick, or breaks another mod.** Cause: two mods redeclaring
+   `item Base.Foo` resolve by load order. Fix: change single fields at `OnGameBoot` through
+   `getScriptManager():getItem("Base.Foo")` instead.
+10. **A container shows empty and can't be filled.** Cause: only half the fluid pair was copied (the `fluid` type
+    or the container's capacity fields). Fix: copy both sides from a vanilla container.
+11. **Skill or XP changes made on an MP client don't stick.** Cause: B42 MP is server-authoritative. Fix: grant XP
+    on the server.
+12. **Trait edits don't show in the character screen.** Cause: the info panel caches them. Fix: SurvivorSwap sets
+    `refreshNeeded = true` on the panel's `charScreen` (it gets the panel with the Lua function
+    `getPlayerInfoPanel`).
+13. **Hair or outfit edits don't redraw.** Cause: the avatar isn't rebuilt. Fix: `resetModel()` after visual
+    edits.
+14. **A challenge starts with the player's preset values.** Cause: `OnInitWorld` didn't set every `SandboxVars`
+    value it relies on. Fix: set all of them.
+15. **A custom CD shows raw keys.** Cause: lines that aren't `RM_<guid>` keys in the translation files. Fix: add the
+    keys; set `spawning` for loot eligibility.
+16. **A broadcast never airs.** Cause: its `day` is outside the world's day range. Fix: check `day` and the loop
+    values.
 
 ## Assets
-- Items/vehicles/entities are pure script + textures/models; vehicle skins are palette PNGs under
-  `textures/Vehicles/`; entity sprites come from tiledefs (`crafted_02_51`-style sprite names from .pack/.tiles).
+- Items, vehicles and entities are script plus textures and models; entity sprites come from tile definitions
+  (`.pack`/`.tiles`, CDDA note); vehicle paint jobs are PNGs in `media/textures/Vehicles/`.
+
+## Cost and time
+Part of one research session on 2026-10-12.
 
 ## Open questions
-- Full component list for `entity` beyond the ~8 types in vanilla `entities/` (undocumented ones likely exist;
-  `javap` on `zombie.scripting.entity` would enumerate them).
-- Whether `timedAction` script blocks can fully replace writing an `ISBaseTimedAction` Lua class for custom
-  actions.
-- `mannequin` block fields beyond outfit+pose.
+- The full component list and per-component grammar for `entity` blocks (javap on `zombie.entity.components` or
+  `ComponentScriptFactory`).
+- Whether a `timedAction` block can replace an `ISBaseTimedAction` Lua class for a custom action.
+- The translation key pattern for a perks.txt `translation` value (copy it from a shipped mod meanwhile).
+- `mannequin` block fields beyond outfit and pose; `ResourceChannel`/`LogisticsSystem` semantics.

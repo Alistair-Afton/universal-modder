@@ -1,202 +1,257 @@
 ---
 kind: game
-title: 'Custom humanoid monsters as dressed zombies: the Cry of Fear NPC mod anatomy (Build 42)'
+title: 'Creatures in Build 42: monsters as dressed zombies, porting creatures from other games, other chassis, and how the NPC frameworks work'
 game: Project Zomboid
-games_also: ["Cry of Fear"]
-game_version: 'Project Zomboid 42.21.0 (Steam, Windows 10); mod version 0.68.25, modversion 42.20+, Workshop item 3813406470'
+games_also: ["Cry of Fear", "Half-Life", "Cataclysm: Dark Days Ahead"]
+game_version: 'Build 42.21.0 (Steam, Windows 10). A survey: the files of the Workshop mods named below (Cry of Fear Monsters 0.68.25 with versionMin=42.20, Bandits, CompanionDogs, ProjectALifeNPCs), a local-only Half-Life port, javap listings and the install''s Lua; nothing was built or run in game for this note'
 platform: windows
 engine: java
 route: loader-api
-tools: ["Project Zomboid Lua (Kahlua) mod API", "Steam Workshop (for source study)"]
-anti_cheat: 'none (single-player focus; mod has partial MP support via the normal Lua networking API)'
+tools: ["Project Zomboid Lua (Kahlua) mod API", javap, "Blender + DirectX X importer", "Paddlefruit rig / PY-BobBatchExportGLB.py", "Crowbar (Half-Life .mdl)"]
+anti_cheat: 'none (single-player creature mods; the multiplayer note covers servers you host)'
 status: in-progress
 agents:
 - Devin (SWE-2 Medium)
 humans: [Alistair-Afton]
 date: '2026-10-12'
-links: []
-tags: [b42, zombies, custom-monster, npc, clothing, bodylocation, animsets, animnode, animation-variables, skinned-mesh, spawning, persistent-outfit, multiplayer, case-study]
+links:
+- "https://steamcommunity.com/sharedfiles/filedetails/?id=3268487204"
+- "https://steamcommunity.com/sharedfiles/filedetails/?id=3740052292"
+- "https://steamcommunity.com/sharedfiles/filedetails/?id=3803984183"
+- "https://pzwiki.net/wiki/Animation_guide"
+tags: [b42, creatures, custom-monster, zombies, clothing, bodylocation, persistent-outfit, animsets, animnode, animation-variables, spawning, outfits, cross-game-port, npc, survivors, companion, bandits, mannequin, thumpable, case-study]
 ---
-# Custom humanoid monsters as dressed zombies: the Cry of Fear NPC mod anatomy (Build 42)
+# Creatures in Build 42: dressed zombies, ports from other games, other chassis and NPC frameworks
 
-> How the *Cry of Fear Monsters* workshop mod (23 monsters: Sawrunner, Faster, Taller, Citalopram, Drowned,
-> Flygare, ...) actually works on Build 42: every monster is a **zombie wearing an invisible whole-body clothing
-> item whose model is a custom skinned mesh**, driven by per-monster Lua controllers, custom AnimSet nodes keyed
-> on animation variables, and a persistent-outfit identity system that survives the engine's zombie recycling.
-> Anatomy study of Workshop 3813406470 (v0.68.25, `versionMin=42.20`) - read for technique, not copied. The
-> alternative "monster = Build 42 animal" route is documented in `cdda-enemy-pack-ants-...md`; this note is the
-> decision guide between them.
+> How custom creatures are built on Project Zomboid Build 42, read from mods that ship them: Svide's *Cry of Fear
+> Monsters* (23 humanoid monsters, each a **zombie wearing an invisible whole-body clothing item** whose model is
+> the monster), a local Half-Life Houndeye port on the turkey's animal rig, and three NPC frameworks (Bandits,
+> CompanionDogs, ProjectALife). The animal route is in main's
+> [CDDA ants note](cdda-enemy-pack-ants-custom-hostile-animals-a-breeding-colon.md) and isn't repeated here. This
+> is a survey of other people's mod files plus javap listings; nothing was built and run in game.
 
 ## Setup
-- PZ **42.21.0**, Steam, Windows 10. Workshop item **3813406470** installed via normal subscription; source at
-  `<SteamLibrary>\steamapps\workshop\content\108600\3813406470\mods\CryOfFearMonsters\{common,42}`.
-- The mod ships with dense development comments (the authors log their own bug history in-file - worth reading
-  directly; quotes below are paraphrased).
-- 13k lines of Lua: `42/media/lua/shared/` (factory, outfits, identity helpers, net, sandbox-backed host
-  settings), `client/` (one controller per monster + movement/presentation/spawning/vehicles/net), `server/`
-  (`COF_ServerMonsters.lua`). Data: `common/media/{models_X,anims_X,clothing,scripts,sound,textures,
-  fileGuidTable.xml,registries.lua}` and `42/media/{AnimSets,sandbox-options.txt,lua}`.
+- Project Zomboid **42.21.0**, Steam, Windows 10. General mod layout and the Lua runtime: the
+  [orientation note](b42-modding-orientation-layout-lua-runtime-tooling-interop-ui.md); Java names: the
+  [Java-surface note](b42-java-surface-lua-callable-api-and-engine-internals.md).
+- Mods read (structure only, described in our own words):
+  - *Cry of Fear Monsters* by Svide (Steam Workshop), v0.68.25, `versionMin=42.20`: about 13k lines of Lua in
+    `42/media/lua/{shared,client,server}`, data in `common/media/{models_X,anims_X,clothing,scripts,sound,
+    textures,fileGuidTable.xml,registries.lua}` and `42/media/{AnimSets,sandbox-options.txt}`. Its files carry
+    the authors' own bug history in comments.
+  - *HLMonsters*: a Half-Life Houndeye port that only exists in the contributor's local `Zomboid/mods` folder; it
+    was never published.
+  - Bandits (Workshop 3268487204), CompanionDogs (3740052292) and ProjectALifeNPCs (3803984183).
 
 ## Route and why
-Loader API - nothing but the game's own Lua + asset pipeline. Two viable monster chassis in B42:
+Loader API: everything below is the game's own Lua plus its asset pipeline. The first decision is the chassis:
 
-| | Zombie body (this mod) | Animal body (CDDA ants note) |
+| | Dressed zombie (Cry of Fear) | B42 animal ([CDDA note](cdda-enemy-pack-ants-custom-hostile-animals-a-breeding-colon.md)) |
 |---|---|---|
-| Base object | `IsoZombie` with a custom clothing body | `IsoAnimal` (subclass of IsoPlayer) |
-| You get for free | Hunt/attack AI vs players, hit reactions, deaths, ragdoll, crawling, fake-dead, vehicle collision, netcode | Pathing, eating, fleeing, growth/stages, butchering, saving |
-| You must build | The whole look (body item, model, animset nodes) + identity + spawn system | The whole brain (attack AI, aggression) in Lua |
-| Best for | Humanoid monsters that hunt players | Creatures with own behaviour, wildlife, packs |
+| Base object | `IsoZombie` wearing a custom whole-body clothing item | `IsoAnimal` (a subclass of `IsoPlayer`) |
+| Free | hunting and attacking players, hit reactions, deaths, crawling, fake-dead, vehicle hits, netcode | pathing, eating, fleeing, growth, butchering, saving |
+| You build | the look (body item, model, AnimSet nodes), identity, spawning | the whole attack brain in Lua |
+| Skin to | the `Bip01` human rig (Bob/Kate) | the closest animal rig (pig, turkey, raccoon ...) |
+| Best for | humanoids that hunt players | creatures with their own behaviour, packs, colonies |
 
-CoF chose zombies because its monsters ARE humanoid hunters - the zombie state machine (target player, lunge,
-bite, thump, stagger) is exactly the needed AI.
+Rule of thumb from the ports: if the creature should hunt the player like a zombie, use a zombie and get the AI
+free; if it needs its own behaviours, use an animal and write the brain.
 
-## How the game works (what the mod shows)
+## How the game works (what we had to learn)
 
-### The dressed-zombie chassis
-- **One new BodyLocation**: `common/media/registries.lua` is a one-liner
-  `ItemBodyLocation.register("COF:MonsterBody")`. At `OnGameBoot` a shared Lua file fetches the
-  `BodyLocations` "Human" group, `getOrCreateLocation(ItemBodyLocation.get(...))` and
-  `moveLocationToIndex` to the `UNDERWEAR_BOTTOM` slot index - putting the monster body at the
-  lowest body-layer position so its skinned model replaces the zombie's visible body while normal
-  clothing layers still render over it.
-- **The body is a clothing item**: `media/scripts/COF_<Monster>Body.txt` defines an invisible
-  `ItemType = base:Clothing`, `ClothingItem = COF_<Monster>Body`, `BodyLocation = COF:MonsterBody`,
-  `WorldRender = false`, `hidden = true`, `Tags = base:noragdoll`. Because it occupies a body location the
-  zombie wears, it replaces the visible body with its own skinned model.
-- **The clothingItem XML** (`media/clothing/clothingItems/COF_<Monster>Body.xml`):
-  `<m_MaleModel>/<m_FemaleModel>` point into `models_X` (`Sawcrazy/Sawcrazy`), one fixed `<m_GUID>`, all 16
-  `<m_Masks>` slots set (hides the underlying body parts), `<m_Static>false`, one
-  `<textureChoices>` atlas. A matching `...CorpseBody.xml` exists per monster so dead bodies keep the look.
-- **`fileGuidTable.xml`** maps every clothing-item XML path to its GUID - required for clothing persistence;
-  generate a v4-style GUID per file and never reuse.
-- **Identity = outfit name, not mod data.** Each monster has a persistent outfit (`COF_Sawrunner`...) made of
-  its body item. `z:dressInPersistentOutfit(outfit)` applies it; `z:getOutfitName()` reads it back;
-  `z:isPersistentOutfitInit()` tells whether the game has actually dressed it yet.
+### The dressed-zombie chassis (Cry of Fear Monsters)
+- **One new body location.** `common/media/registries.lua` is one call,
+  `ItemBodyLocation.register("COF:MonsterBody")`. At `OnGameBoot` a shared Lua file takes the "Human"
+  `BodyLocationGroup`, calls `getOrCreateLocation` for the new location and `moveLocationToIndex` to put it at the
+  `UNDERWEAR_BOTTOM` index, the lowest body layer. The monster's model then replaces the zombie's visible body and
+  ordinary clothing still renders over it.
+- **The body is an invisible clothing item:** a script item with `ItemType = base:Clothing`,
+  `ClothingItem = COF_<Monster>Body`, `BodyLocation = COF:MonsterBody`, `WorldRender = false`, `hidden = true`,
+  `Tags = base:noragdoll`.
+- **The clothingItem XML** points `m_MaleModel`/`m_FemaleModel` at the mesh in `models_X`, has one fixed GUID,
+  sets all 16 `m_Masks` (hiding the base body), `m_Static` false and one `textureChoices` atlas. A matching
+  corpse XML per monster keeps the look on dead bodies. Every clothing XML's GUID goes into `fileGuidTable.xml`.
+- **Identity is the outfit, not mod data.** Each monster is a persistent outfit containing only its body item.
+  `dressInPersistentOutfit(name)` applies it, `getOutfitName()` reads it, `isPersistentOutfitInit()` says whether
+  the game has dressed the zombie yet.
 
-### Why the identity system is the hardest part (their own bug history)
-- The engine **recycles zombie objects**. A recycled zombie keeps its old `getOutfitName()` until re-dressed
-  (which only happens when it comes into view). If controllers claim zombies by outfit name, a recycled zombie
-  gets claimed by the WRONG monster's controller, then re-claimed - two controllers stripping each other's body
-  item (naked zombie) and playing competing sounds.
-- Mod-data marks are also unreliable: a monster that leaves and re-enters the loaded area can lose its mark,
-  and unmarked types get spawned again (their log: "13 Sawcrazies and endless Human Flowers in an hour").
-- Their fix (`COF_AIdentity.lua`): on `OnZombieCreate`, if `isPersistentOutfitInit()` is false, clear the stale
-  `getHumanVisual():setOutfit(nil)` and immediately `dressInPersistentOutfitID(getPersistentOutfitID())` so the
-  controller owns it before it is ever seen. The high half of `getPersistentOutfitID()` is the outfit index -
-  a table learned from every dressed monster maps index -> monster name, so undressed zombies are identified
-  before dressing.
-- Per-frame dispatch on `Events.OnZombieUpdate`: every controller registered via `I.onUpdate(name, fn)` runs on
-  each zombie each update; a weak-keyed `previousIdentity` table detects identity changes so old controllers
-  get one cleanup pass (stop looping sounds, drop live tables) when a zombie is recycled into a different
-  monster.
+### Why identity is the hard part (from the mod's own bug notes)
+- **The engine recycles zombie objects.** A recycled zombie keeps its old `getOutfitName()` until it's re-dressed,
+  which happens when it comes into view. Controllers that claim zombies by outfit name then grab the wrong one,
+  and two controllers strip each other's body item (a naked zombie playing the wrong sounds).
+- **Mod-data marks get lost** when a monster leaves and re-enters the loaded area, so unmarked types spawn again
+  (their log: 13 of one monster and endless flowers in an hour).
+- **Their fix:** in `OnZombieCreate`, when `isPersistentOutfitInit()` is false, clear the stale outfit with
+  `getHumanVisual():setOutfit(nil)` and immediately `dressInPersistentOutfitID(getPersistentOutfitID())`, so the
+  controller owns the zombie before it's ever seen. The high half of `getPersistentOutfitID()` is the outfit
+  index, and a table learned from dressed monsters maps index to monster.
+- **One dispatch point:** every controller registers with the mod's dispatcher on `OnZombieUpdate`; a weak-keyed
+  "previous identity" table spots a recycled zombie and gives the old controller one cleanup pass (stop loops,
+  drop tables).
 
-### Custom animations on the zombie animset
-- `42/media/AnimSets/zombie/<state>/COF_*.xml` files merge into the vanilla zombie AnimSet: states seen include
-  `attack`, `walktoward`, `idle`, `hitreaction`, `falldown*`, `getup`, `lunge`, `pathfind`, `eatbody`,
-  `fakedead`, `bumped`, `vehicleCollision-*`, `corpseDragged*` - the full vanilla zombie state list is the
-  template to mirror.
-- Each `animNode` picks `m_AnimName` (a clip in `anims_X/<monster>/`) gated by `m_Conditions` on animation
-  variables, e.g. `COF_IsSawrunner == true` AND `COF_SawrunnerAttacking == false`. Lua sets them:
-  `z:setVariable("COF_IsSawrunner", true)` at claim time; attack loops toggle `COF_<M>Attacking`.
-- Vanilla variables matter too: `ZombieBiteDone` gates bite application - controllers set it false at attack
-  start and true to cancel; custom attack clips are selected by setting a `COF_<M>AttackClip` STRING variable
-  that the animNode conditions read.
-- `42/media/COF_AnimTemplates/` and `COF_SawcrazyTemplates/` are working copies of the vanilla AnimSet XML the
-  authors keep in the mod for reference/generation - NOT loaded (only `media/AnimSets/` is).
-- Animation files: `common/media/anims_X/<Monster>/COF_*.x` (text DirectX here; .glb/.fbx work too).
+### Animation plumbing
+- **The stack:** an AnimSet (per entity, `media/AnimSets/<entity>/<state>/*.xml`), an ActionGroup state machine
+  over its states (`media/actiongroups/`), and `animNode` XML: `m_AnimName`, `m_Looped`, `m_BlendTime` and
+  `m_Conditions` on animation variables that Lua sets with `character:setVariable("Name", value)`.
+- **Merge, don't replace.** Mod XML under `media/AnimSets/zombie/<state>/` merges into the zombie's graph. Cry of Fear
+  adds nodes to the vanilla states (`attack`, `walktoward`, `idle`, `hitreaction`, `lunge`, `getup`, `eatbody`,
+  `fakedead`, `bumped`, the vehicle-collision and corpse-drag states ...) gated on `COF_Is<Monster> == true`, and
+  picks attack clips through a STRING variable the conditions read. The vanilla `ZombieBiteDone` variable gates
+  bite damage, and controllers set it themselves. Their `COF_AnimTemplates/` folders are reference copies that
+  the game doesn't load (only `media/AnimSets/` is read).
+- **Clip folders:** only `anims_X` subfolders named by the model's `animationsMesh` script entry are scanned, with
+  the prefix that entry sets; human rigs scan `Bob/` and `Kate/` with `Bob_`/`Kate_` prefixes, which come from
+  each ActionGroup root's `animNodeFilter` (`media/actiongroups/zombie.xml`, `player.xml` ...). The install's
+  `Master_Variables.xml` lists the variables conditions can read.
+- **Formats:** `.glb` (recommended, hot-reloadable; the Paddlefruit community rig and its
+  `PY-BobBatchExportGLB.py` exporter, 30 fps), `.fbx`, or vanilla text `.x`. Import vanilla `.x` into Blender with
+  the "DirectX X Importer" extension or ZomboidAssetConverter. Models load through the game's assimp
+  (`jassimp64`), so no conversion to `.x` is needed. AnimZed, TIS's own tool, was announced but not released at
+  research time.
+- `media/animscript/combat.xml` is a second, older AnimStates language (`<PlayAnim>`/`<Out>` states); don't mix
+  it up with AnimSet `animNode` files.
 
 ### Spawning
-- Normal population path: `addZombiesInOutfit(x, y, z, count, outfit, femaleChance, crawler, ...)` dressed in
-  the monster's outfit - works only when zombie population isn't None.
-- Population-None path: `VirtualZombieManager.instance:createRealZombieNow(x, y, z)` then set everything by
-  hand (`setFemaleEtc`, `dressInPersistentOutfit`, `setCrawler`, `setKnockedDown`, `setFakeDead`,
-  `setGodMod`, `setSitAgainstWall`, `setHealth`). Two traps documented in-file: only callable server-side
-  (`isClient()` early-out; MP clients get an empty list), and Java *fields* aren't reachable from Lua (an old
-  version read `manager.choices`, got nil, spawned nothing - methods only).
-- A whole spawn system sits on top: `COF_MonsterSpawns` (weighted rarity per monster, independent of zombie
-  population), `COF_MonsterSites`, a Sawrunner "night event" (distant rev wakes sleepers, lurks, chase music,
-  leaves at dawn), `COF_SpawnDiagnostics` for logging, and debug right-click test spawns.
+- **Outfits** are `media/clothing/clothing.xml` entries per sex: a name, a GUID and items by clothingItem GUID with
+  optional probabilities and alternates. Every item GUID must be in your `fileGuidTable.xml` or the outfit
+  silently fails.
+- **Zone spawn tables:** `media/lua/shared/NPCs/ZombiesZoneDefinition.lua` maps a map zone name to
+  `chanceToSpawn`/`toSpawn` and outfit entries (`name`, `toSpawn`, `gender`, `mandatory`, `room`, `chance`). A mod
+  adds keys from a shared Lua file: that's how "special zombies in special places" works (vanilla: a wedding party
+  in a church).
+- **By hand:** `addZombiesInOutfit(x, y, z, count, outfit, femaleChance, ...)` needs the zombie population on.
+  With population None, Cry of Fear calls `VirtualZombieManager.instance:createRealZombieNow(x, y, z)` and sets
+  everything itself (`setFemaleEtc`, `dressInPersistentOutfit`, `setCrawler`, `setFakeDead`, `setHealth` ...).
+  It works only on the server (an MP client gets an empty result), and an old version read a Java field there and
+  spawned nothing.
+- On top sits the mod's own spawn system: weighted rarity per monster independent of the zombie population,
+  per-monster sandbox toggles and rarity enums, a night event, spawn diagnostics in the log, and debug
+  right-click spawns.
+- Multiplayer: creation is server-only, controllers early-return on `isServer()` and the factory on `isClient()`;
+  the server tells clients "this zombie is monster X" and each client sets the variables and visuals locally. See
+  the [multiplayer note](b42-multiplayer-internals-packets-gameserver-sync.md).
 
-### Sounds, UI, multiplayer
-- `media/scripts/COF_<M>Sounds.txt`: `sound` blocks, `category = Zombie`, `is3D`, `distanceMin/Max`,
-  `maxInstancesPerEmitter`, `loop`, multiple `clip {}` files per sound = random variants. Controllers
-  start/stop loops per zombie; identity changes must kill loops (see dispatch cleanup above).
-- Client-only features: `COF_DrownedStruggleUI`, `COF_HealthDisplay`, `COF_HostSettingsUI` - all under
-  `client/`, none of it server-visible.
-- MP support is explicit but bounded: `shared/COF_Net.lua`, `client/COF_NetClient.lua`, `COF_NetSync`,
-  `COF_MultiplayerCorpses`, `server/COF_ServerMonsters.lua`; controllers early-return on `isServer()` and the
-  factory early-returns on `isClient()`. "A player's game in multiplayer never creates zombies" - all creation
-  is server-side, presentation syncs down.
-- Sandbox options: `sandbox-options.txt` pages per rarity group (`None/Rare/Uncommon/Normal/High` enum via
-  `numValues` + `valueTranslation`, booleans per creature), read via `SandboxVars.COF_Creatures.*` and mirrored
-  into `COF_HostSettings` for MP host control.
+### Porting a creature from another game: three asset routes
+- **A. The other game's own assets** (Cry of Fear Monsters ships Cry of Fear's models, animations and sounds;
+  its Workshop page credits them to Team Psykskallar and states no licence or permission). If the source game
+  exports skinned meshes and clips as `.fbx`/`.glb`/`.x`, they load directly.
+- **B. Converted assets** (HLMonsters): Half-Life `.mdl` -> Crowbar (or similar) to `.smd`/`.fbx` -> re-skin to a PZ
+  rig -> text `.x` (`media/models_X/Skinned/Houndeye.x`, clips in `media/anims_X/houndeye/he_*.x`, an
+  `animationsMesh` with `animationDirectory = houndeye`, `animationPrefix = he_`). Its AnimSet is a copy of the
+  turkey's state folders with `he_` entries.
+- **C. Generated assets** (the CDDA ants): no source assets at all; the pipeline is in the CDDA note's Assets.
+- **Rights:** A and B are another game's copyrighted content, taken from your own install. Keep such a port
+  private; a public release needs the rights holder's permission, or your own assets (route C). Converting a
+  format doesn't change who owns it. HLMonsters stays local for this reason.
+- **Skeleton:** reuse a PZ rig (`Bip01` or an animal's) so the vanilla AnimSet works; a custom skeleton means
+  authoring every state. Rename source clips into PZ's state folders on export, and make sure the clip name
+  inside each file matches `m_AnimName`.
 
-## Build steps (your own dressed-zombie monster)
-1. BodyLocation: `ItemBodyLocation.register("MyMod:MonsterBody")` in `common/media/registries.lua`; at
-   `OnGameBoot` insert it into the Human group near `UNDERWEAR_BOTTOM`.
-2. Model: skinned mesh in `common/media/models_X/<Monster>/` (`.glb`/`.fbx`/`.x`), clothingItem XML with all
-   `<m_Masks>` 0-15 set + fixed GUID + `textureChoices` atlas in `media/textures/`; add the GUID to
-   `fileGuidTable.xml`; corpse variant too.
-3. Item: invisible clothing script block bound to `BodyLocation = MyMod:MonsterBody`; outfit XML/definition
-   `MyMod_Monster` containing only that item.
-4. AnimSet: copy the vanilla zombie state XML list, write `animNode`s keyed on `MyMod_Is<Monster>` variables;
-   clips in `anims_X/<Monster>/` matching your `animationsMesh`.
-5. Controller: `client/` Lua claimed via `OnZombieUpdate` dispatch keyed on `getOutfitName()`/`persistent
-   outfit ID`; set `COF_Is*`-style variables at claim; drive attacks with `ZombieBiteDone` + attack-clip
-   string variables; sounds via `playSound`/`emitter` on the zombie.
-6. Spawner: server-side only - `createRealZombieNow` + `dressInPersistentOutfit` for population-None, or
-   `addZombiesInOutfit` when the vanilla population is on.
-7. Recycling safety: clear stale outfit on `OnZombieCreate` before the zombie is dressed; keep identity
-   derivation from outfit, not mod data; give every controller a cleanup path on identity change.
+### Other chassis (catalogue; none of these was tried)
+| Body | Engine object | Notes |
+|---|---|---|
+| Friendly or neutral humanoid | `IsoZombie` that never gets a target | `clearAggroList`, no `spotted(player)`, steer with `pathToLocationF`/`pathToCharacter`; other zombies, melee auto-aim and player panic still treat it as a zombie |
+| Pet or pack animal | `IsoAnimal` on a lead | `IsoPlayer:addAttachedAnimal`, `checkAnimalAttachedToRope`; troughs, milk, eggs |
+| Static figure | `IsoMannequin` | `mannequin` script blocks, `registerMannequinZone` (on `IsoWorld` and `IsoMetaGrid`); poses, no skeletal animation |
+| Turret, mimic, plant | `IsoThumpable` | `Thump`, `WeaponHit`, `animalHit`, `changeSprite`; no locomotion; tick it with `IsoCell:addToProcessIsoObject` |
+| Visual only | `IsoObject` + sprites | `addAttachedAnimSprite` overlays; `WorldSoundManager.instance:addSound` for noise |
+| Boss or swarm | several of the above | one controller, shared ModData pool; reassemble after chunk unload |
+
+Whether Lua can drive the `Bullet` physics wrapper or `ModelManager.addStatic` directly is unknown; plan around the
+engine's own hit and vehicle paths. `playerVoiceSound` is player-only: NPC barks are positioned `sound` entries,
+and overhead speech text is `IsoGameCharacter:addLineChatElement(text, r, g, b ...)` (BeyondOneWeek uses it with
+`getSpeakColour()` for debug lines).
+
+### NPC frameworks in the wild
+- **Bandits** (survivor NPCs on zombies):
+  - identity is a boolean animation variable, read with `zombie:getVariableBoolean("Bandit")`, plus a brain table
+    per bandit (`BanditBrain.Get(zombie)`) keyed by a stable id, and position-only "light" caches for the per-tick
+    path;
+  - verbs are 49 action modules in `shared/ZombieActions/` with `onStart`/`onWorking`/`onComplete(zombie, task)`
+    (walking, climbing, aiming, shooting, reloading, looting, bandaging, fishing, generator work, burying ...);
+  - programs in `shared/ZombiePrograms/` (`ZPBandit`, `ZPCompanion`, `ZPLooter`, `ZPThief` ...) are state machines
+    that return `{status = ..., next = "State", tasks = {...}}`;
+  - locomotion uses the player-style animation channel on the zombie: a `BanditWalkType` variable,
+    `setBumpType("IdleToRun"|"IdleToWalk")`, `pathToLocationF` and `faceLocationF`, with the mod's own AnimSets
+    and actiongroups;
+  - in MP only the owning client steers (`BanditUtils.IsController(zombie)` gates the path calls), and
+    `OnZombieUpdate` returns early on the server, so the brains run on clients and sync through commands.
+- **CompanionDogs** builds a dog on the **raccoon**: `cd`-prefixed animNodes merged into
+  `media/AnimSets/raccoon/`, a radial command menu (`ISRadialMenu`), status, stray-scan and bag windows.
+- **ProjectALife** splits an NPC suite into subsystem folders, a shared `alife_runtime` catalog that several
+  scenario mods build on, and a `Compat/` folder with one adapter per other mod.
+
+## Build steps
+1. Chassis (table above); write down which free systems you rely on.
+2. Dressed zombie: register a body location in `common/media/registries.lua` and move it to the
+   `UNDERWEAR_BOTTOM` index at `OnGameBoot`; skinned mesh in `models_X/<Monster>/`; clothingItem XML with all 16
+   masks, a fixed GUID and a texture atlas, plus a corpse variant; GUIDs in `fileGuidTable.xml`; an invisible
+   clothing item on your location; an outfit with only that item.
+3. AnimSet nodes under `media/AnimSets/zombie/<state>/` keyed on `MyMod_Is<Monster>`; clips in
+   `anims_X/<Monster>/` matching the `animationsMesh` entry.
+4. A controller per monster behind one `OnZombieUpdate` dispatcher keyed on the persistent outfit; set the
+   variables at claim time, drive attacks with `ZombieBiteDone` and a clip-select variable, clean up on identity
+   change.
+5. Spawn on the server only: `createRealZombieNow` + `dressInPersistentOutfit`, or `addZombiesInOutfit` when the
+   population is on; sandbox toggles and rarities; debug right-click spawns for testing.
+6. On `OnZombieCreate`, clear the stale outfit and re-dress before the zombie is seen.
 
 ## Verification
-- The mod itself is the evidence (installed and its structure read end-to-end); its in-file comments document
-  the user-visible symptoms of each failure mode (naked zombies, wrong sounds, runaway spawns).
-- For your own build: `Zomboid/console.txt` after each session; `-debug` animator view to watch animNode
-  selection; a debug context-menu spawn entry (their `COF_SpawnDiagnostics` pattern) to iterate.
-- Not verified: dedicated-MP correctness of the net layer; whether `dressInPersistentOutfitID` timing changed
-  after 42.21.
+- Survey only: the mods' files were read end to end (structure, names, comments); none of them was run for this
+  note, and no creature was built. The Java names were checked against the unofficial 42.21.0 javadocs
+  (albion.codeberg.page/PZ-JavaDocs) at review time, and the Bandits identity check against a public copy of its
+  42.20 Lua.
+- For your own creature: `console.txt` after every session, the `-debug` animator window to watch which
+  animNode plays, and debug spawn entries.
+- Not verified: Cry of Fear's MP layer on a dedicated server; whether the persistent-outfit timing changed after
+  42.21; any of the "other chassis"; Bandits in MP.
 
 ## Gotchas
-1. **Recycled zombies carry stale outfit names** -> wrong controller claims them. Fix: on `OnZombieCreate`,
-   clear `getHumanVisual():setOutfit(nil)` when not yet `isPersistentOutfitInit()`, re-dress from
-   `getPersistentOutfitID()`.
-2. **Mod-data marks don't survive chunk unload/reload reliably** -> duplicate spawns. Fix: identity from the
-   outfit/persistent-ID (engine-side truth), count monsters via identity not marks.
-3. **Two controllers on one zombie** -> body item stripped by the other controller = naked zombie playing the
-   wrong sounds. Fix: single dispatch point, per-zombie previous-identity tracking, cleanup pass on change.
-4. **Looping monster sounds survive the monster.** Fix: kill emitters/loops in the identity-change cleanup,
-   not just on death.
-5. **`addZombiesInOutfit` silently does nothing when zombie population is None.** Fix:
-   `VirtualZombieManager.instance:createRealZombieNow` (server only) + manual property set.
-6. **Lua cannot read Java fields** (`manager.choices` = nil). Only public methods. Fix: find the accessor; the
-   game creates the square-in-list itself inside `createRealZombieNow`.
-7. **Client-side spawning in MP spawns nothing** (or local phantoms). Fix: all creation server-side;
-   `isClient()`/`isServer()` guards in shared files.
-8. **Attack anims never trigger.** Vanilla bite only fires when `getShouldAttack()` passes (~0.72 tiles) and
-   `ZombieBiteDone` state cooperates. Fix: drive custom clips through your own attack variables + a clip-select
-   string variable, and set `ZombieBiteDone` yourself.
-9. **Missing `fileGuidTable.xml` entry -> clothing loses identity across saves/MP.** Every clothingItem XML
-   needs a unique stable GUID.
-10. **Monster turns back into a normal zombie after reload.** Cause: body item removed but zombie persists.
-    Fix: corpse body variant + controller re-asserts body item in its tick when identity holds.
-11. **Whole-body look but vanilla hands/head poke through.** Fix: all 16 `<m_Masks>` entries set; check
-    `m_AttachBone` empty and `m_Static=false` on the clothingItem.
-12. **New animset replaces movement instead of adding to it.** (Same failure as the CDDA animal copy.) Fix:
-    add nodes into `media/AnimSets/zombie/` keyed on variables; never replace the base set.
+1. **A monster's controller grabs the wrong zombie.** Cause: recycled zombies keep a stale outfit name.
+   Fix: on `OnZombieCreate`, `getHumanVisual():setOutfit(nil)` when not `isPersistentOutfitInit()`, then
+   re-dress from `getPersistentOutfitID()`.
+2. **Duplicate spawns over time.** Cause: mod-data marks don't reliably survive chunk unload and reload. Fix:
+   identify and count monsters by persistent outfit, not marks.
+3. **A naked zombie playing the wrong sounds.** Cause: two controllers on one zombie. Fix: one dispatch point,
+   previous-identity tracking, a cleanup pass on change.
+4. **Looping monster sounds outlive the monster.** Fix: stop them in the identity-change cleanup, not only on
+   death.
+5. **`addZombiesInOutfit` does nothing.** Cause: zombie population set to None. Fix: server-side
+   `createRealZombieNow` and set the properties by hand.
+6. **Custom attack clips never play.** Cause: vanilla bites need the target within reach (about 0.72 tiles, CDDA
+   note), a check Lua can't call. Fix: your own attack variables, a clip-select string variable, and set
+   `ZombieBiteDone` yourself.
+7. **The clothing body vanishes across saves or in MP.** Cause: a clothing XML without its `fileGuidTable.xml`
+   entry. Fix: a unique, stable GUID per clothing XML.
+8. **The monster turns back into a zombie after a reload.** Cause: the body item was lost while the zombie
+   persisted. Fix: a corpse body variant, and the controller re-adds the body item while the identity holds.
+9. **Vanilla hands or head poke through the monster.** Fix: all 16 `m_Masks`, `m_Static` false, no attach bone.
+10. **The new AnimSet replaces movement instead of adding to it.** Cause: replacing the base set (the same
+    failure as the animal-animset copy in CDDA gotcha 1). Fix: add nodes into the vanilla state folders, gated
+    on variables.
+11. **An animation file never loads, with no error.** Cause: the `anims_X` folder or file prefix doesn't match the
+    `animationsMesh` entry (or the `Bob_`/`Kate_` prefixes for humans), or the clip name inside the file differs
+    from `m_AnimName`. Fix: match all three.
+12. **A recycled Bandits-style NPC keeps its flag.** Cause: animation variables stay on the zombie object. Fix:
+    clear them in the same recycle cleanup as outfits.
+13. **A friendly zombie still behaves like a zombie.** Cause: other zombies, melee auto-aim and player panic key
+    on the zombie type. Fix: budget overrides, or use a mannequin or an animal.
+14. **Publishing another game's assets gets the mod pulled.** Fix: keep such ports private, get permission, or
+    generate your own assets.
 
 ## Assets
-- Meshes: `models_X/<Monster>/` skinned meshes + `textures/` atlases (textureChoices per clothingItem).
-- Anims: `anims_X/<Monster>/` (this mod uses `.x`; `.glb` is the recommended modern path - see the anatomy
-  note's animation section).
-- Sounds: `sound/COF/<monster>/*.wav` bound by `sound` script blocks, category Zombie, 3D falloff tuned per
-  alert/idle/attack/death; variants via multiple `clip {}` entries.
-- The mod (by Svide, Workshop item 3813406470) uses Cry of Fear's original models/animations/sounds,
-  credited to Team Psykskallar; no licence or permission is stated on the Workshop page, so treat the
-  assets as unlicensed source-game content - study the structure, don't copy files.
+- Meshes in `models_X/<Monster>/`, texture atlases in `textures/` (`textureChoices`), clips in
+  `anims_X/<Monster>/`, sounds in `sound/<mod>/` bound by `sound` blocks (category `Zombie`, 3D falloff, several
+  `clip {}` variants per sound).
+- Credit: Svide's *Cry of Fear Monsters* for the dressed-zombie technique (Cry of Fear's assets belong to Team
+  Psykskallar); the Bandits, CompanionDogs and ProjectALife authors for the NPC architectures.
+
+## Cost and time
+Part of one research session on 2026-10-12.
 
 ## Open questions
-- How much of the net layer is strictly needed for listen-server co-op vs dedicated.
-- Whether a hybrid is viable: animal chassis with a zombie-hunter brain (animals can fight; CDDA note proves
-  hostility, zombies-vs-animal NPEs documented there).
-- AnimZed's release may obsolete the hand-written animNode XML workflow.
+- How much of Cry of Fear's net layer a listen-server co-op needs versus a dedicated server.
+- A hybrid: an animal body with a zombie-hunter brain (the CDDA note shows hostile animals; zombie-vs-animal
+  targeting crashes, see its gotcha 5).
+- Whether a non-network `IsoPlayer` can be spawned as a puppet; the smallest workable AnimSet for a custom
+  skeleton; `zombie.popman` hooks for horde-scale monster populations.

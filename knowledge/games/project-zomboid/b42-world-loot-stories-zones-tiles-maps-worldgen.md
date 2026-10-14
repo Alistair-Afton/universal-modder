@@ -1,14 +1,14 @@
 ---
 kind: game
-title: 'Build 42 world simulation: loot distributions, random stories, metazones, WorldGen, basements, climate and meta events'
+title: 'The Build 42 world for modders: loot and foraging, world stories, zones, persistent world systems, tiles and moveables, map files, worldgen and basements'
 game: Project Zomboid
 games_also: []
-game_version: 'Build 42.21.0 (Steam, Windows 10); verified against media/lua/server + jar class census'
+game_version: 'Build 42.21.0 (Steam, Windows 10). A survey: the install''s media/ files and Lua (media/lua/server, shared and client), the media/maps folders and javap listings; nothing was built or run in game for this note'
 platform: windows
 engine: java
 route: loader-api
-tools: ["Project Zomboid Lua (Kahlua) mod API", "javap / ZomboidDecompiler for the zombie.* packages"]
-anti_cheat: 'none (server-side simulation modding)'
+tools: ["Project Zomboid Lua (Kahlua) mod API", javap, "TileZed/WorldEd community forks", "in-game world map editor (ISUI/Maps/Editor)"]
+anti_cheat: 'none (single player and servers you host)'
 status: in-progress
 agents:
 - Devin (SWE-2 Medium)
@@ -16,179 +16,195 @@ humans: [Alistair-Afton]
 date: '2026-10-12'
 links:
 - "https://pzwiki.net/wiki/ProceduralDistributions"
-- "https://pzwiki.net/wiki/Distributions"
-tags: [b42, loot, distributions, proceduraldistributions, world-stories, metazones, metagrid, zones, worldgen, basements, climate, weather, meta-events, helicopter, ai-director, java-internals]
+- "https://pzwiki.net/wiki/Tile_properties"
+- "https://pzwiki.net/wiki/Mapping"
+tags: [b42, world, loot, distributions, foraging, world-stories, metazones, zones, global-objects, farming, fishing, tiles, tiledef, moveables, seating, spritemodels, maps, map-mods, stashes, worldmap, worldgen, basements, erosion]
 ---
-# Build 42 world simulation: loot distributions, random stories, metazones, WorldGen, basements, climate and meta events
+# The Build 42 world for modders: loot, stories, zones, world systems, tiles, maps and worldgen
 
-> The systems that make the *world* tick - loot tables, randomized world stories, the zone metagrid, B42's Lua
-> world generator, the new basements API, climate/seasons, and the Sadistic AI Director meta events. All of it
-> is plain Lua tables or Java methods a mod can extend. This is the layer for mods that change *what the world
-> does*, not what things look like.
+> The systems that make the world: loot and foraging tables, randomized world stories, the zone metagrid,
+> persistent world systems (farming, rain barrels, generators), what a tile's properties do, moveable furniture,
+> map mods and their files, the annotated-map stash system, B42's Lua world generator and basements. Most of it is
+> Lua tables or text files a mod extends. It's a survey of a 42.21.0 install; nothing was built and run in game.
+> Start with the [orientation note](b42-modding-orientation-layout-lua-runtime-tooling-interop-ui.md).
 
 ## Setup
-- PZ **42.21.0** Steam/Windows. All systems below live in `<install>/media/lua/server/` (readable) and
-  `projectzomboid.jar`'s `zombie.*` packages (decompilable, see Route).
+- Project Zomboid **42.21.0**, Steam, Windows 10. The systems live in `<install>/media/lua/{server,shared,client}/`
+  (readable), `media/maps/`, `media/*.txt`, and the jar's `zombie.iso`, `zombie.randomizedWorld`,
+  `zombie.iso.worldgen`, `zombie.basements` and `zombie.erosion` packages.
+- On main already: how `ProceduralDistributions` lists work, `Events.OnPreDistributionMerge` as the moment to edit
+  them, and that loot is rolled when a container is first generated
+  ([B41 note](b41-modpack-fix-mods-and-linux-dedicated-server.md)); cells of 256x256 squares, `getZonesAt` on
+  unloaded areas, and the `.pack`/`.tiles` formats for custom tiles
+  ([CDDA ants note](cdda-enemy-pack-ants-custom-hostile-animals-a-breeding-colon.md)).
 
 ## Route and why
-Loader API again - every system here is data (Lua tables) or exposed Java calls. For the internals that aren't
-exposed cleanly, decompile with ZomboidDecompiler and *describe*; never ship patched classes.
+Loader API: data tables, text files and exposed Java calls. For internals that aren't exposed, decompile and
+describe; never ship patched classes.
 
-### The Java package map (for decompile-driven questions)
-Class counts per package in `projectzomboid.jar` (42.21.0) - where to look when Lua docs run out:
+## How the game works (what we had to learn)
 
-| Package | ~Classes | Owns |
-|---|---|---|
-| `zombie/core/` | 773 | renderer, sprites, textures, core engine |
-| `zombie/iso/` | 661 | the live world: IsoCell, IsoGridSquare, IsoObject, IsoPlayer, rooms, fire, weather objects |
-| `zombie/network/` | 628 | MP packets, sync, server logic |
-| `zombie/scripting/` | 407 | the script parser (all the block types) + entity scripting |
-| `zombie/characters/` | 339 | IsoGameCharacter stats, BodyDamage, traits, skills, safety/combat |
-| `zombie/entity/` | 328 | the B42 entity-component system behind `entity` script blocks |
-| `zombie/util/` | 207 | collections, io, misc |
-| `zombie/audio/` | 166 | FMOD wrapper, emitters, GameSounds |
-| `zombie/randomizedWorld/` | 164 | world stories, abandoned cars, burnt houses, the helicopter |
-| `zombie/worldMap/` | 153 | the annotated map / symbols system |
-| `zombie/vehicles/` | 146 | BaseVehicle, parts, physics |
-| `zombie/ai/` + `zombie/pathfind/` | 252 | zombie states, pathfinding |
-| `zombie/debug/` | 124 | the -debug menus (study it for dev-tools ideas) |
-| `zombie/commands/` | 79 | admin/server commands (`/additem`, `/godmod`...) - mirror for custom commands |
-| `zombie/inventory/` | 76 | items, containers, ItemPicker |
-| `zombie/erosion/` | 57 | plant/crack growth over time |
-| `zombie/gameStates/` | 46 | menu/loading/game states |
-| `zombie/tileDepth/` | 41 | isometric depth |
-| `zombie/radio/` + `zombie/chat/` | 68 | broadcast channels, chat |
-| `zombie/popman/` | 35 | PZPopMan - zombie population director |
-| `zombie/Lua/` | 31 | LuaManager, event dispatch, Kahlua binding |
-| `zombie/savefile/`, `zombie/fileSystem/` | 43 | saves, chunk io |
-| `zombie/basements/` | 12 | B42 basements |
-| `zombie/seams/`, `zombie/seating/`, `zombie/pot/`, `zombie/spnetwork/`, `zombie/gizmo/`, `zombie/vispoly/`, `zombie/asset/`, `zombie/combat/`, `zombie/statistics/`, `zombie/sandbox/`, `zombie/buildingRooms/`, `zombie/globalObjects/`, `zombie/profanity/`, `zombie/text/` | ~120 | seams between chunks, seats, pottery UI?, SP networking, editor gizmos, visibility polys, asset db, melee combat, stats, sandbox opts, room detection, global objects, word filters, localization |
-| native DLLs | - | `PZBullet64` (physics), `PZClipper64` (geometry), `PZPathFind64`, `PZPopMan64`, `PZPathFind`, `ZNetJNI64`/`ZNetNoSteam64` (net), `fmod*`, `jassimp64` (model import), `Lighting64` |
+### Loot
+- `media/lua/server/Items/Distributions.lua` (with `SuburbsDistributions.lua` and the junk files) maps room types
+  and container types to item lists; `ProceduralDistributions.list` holds the named tables containers reference.
+- `ItemPickerJava.getLootModifier(item)` is the rarity modifier, and the `RemoveStoryLoot` sandbox option filters
+  story clutter. `ScriptManager.instance:FindItem("Base.X")` checks an item id; use it at boot to log bad ids in
+  your entries, because a typo just never spawns.
 
-## How the game works
-
-### Loot: Distributions + ProceduralDistributions
-- `media/lua/server/Items/Distributions.lua` (+ `Distribution_*Junk.lua`, `SuburbsDistributions.lua`) defines
-  the `Distributions`/`SuburbsDistributions` tables: per room type (`all`, `kitchen`, `gunstore`...), per
-  container type, weighted item lists.
-- `ProceduralDistributions.list` = named tables `{ rolls = N, items = {"Item",weight,...},
-  junk = { rolls, items } }` - container types reference these by name via `procedural` entries; rooms get the
-  base `Distributions` tables plus procedural overlays.
-- **Modding it**: a shared/server Lua file appends entries (`table.insert(ProceduralDistributions.list["GunStoreGuns"].items, "MyGun")` and its weight) or adds whole tables. `ItemPickerJava.getLootModifier(item)` is the rarity modifier hook; the `RemoveStoryLoot` sandbox option blacklists story clutter.
-- `ScriptManager.instance:FindItem("Base.X")` validates an item id at runtime (how vanilla catches typos in
-  loot tables - use it in your init to log bad entries).
+### Foraging (`media/lua/shared/Foraging/`)
+A complete data system; `forageDefinitions.lua` documents every field inline.
+- Item definitions: `type`, `minCount`/`maxCount`, `skill` and `perks`, `xp`, visibility gates (`recipes`,
+  `traits`, `itemTags`), `categories`, weather and time chances (`rainChance`, `snowChance`, `dayChance`,
+  `nightChance`), `zones = { Forest = n, DeepForest = n, ... }` where **n is a roll count, not a percent**,
+  months (`months`, `bonusMonths`, `malusMonths`), `spawnFuncs`, placement flags, poison fields.
+- Zone definitions: zone type, icon density, `refillPercent` per day, `abundanceSetting` (the `NatureAbundance`
+  sandbox key) and `containsBiomes`. Category definitions: roll `chance`, the perk that identifies the category,
+  floor rules, search-focus chances.
+- Zone state lives in the `"forageData"` ModData. New forageables = an item definition, optionally a category.
 
 ### Randomized world stories
-- `zombie/randomizedWorld/` (Java, 164 classes) + `server/RandomizedWorldContent/StoryTable_Initialization.lua`
-  + `StoryClutter/`: house/street scenarios placed when the world generates - boarded windows, corpses with
-  loot, burnt houses, crashed cars, table settings (the clutter tables above).
-- Stories attach to rooms at world-gen time (like the nest-site lesson from the CDDA note: pick the site early,
-  build when the square loads). `RandomizedWorldBase` subclasses get called per candidate room; criteria are
-  room type + zone.
-- Story clutter items go through `StoryTables.addItemToClutterTable` which validates against
-  `ScriptManager` and the sandbox blacklist.
+`zombie.randomizedWorld` (Java) with `server/RandomizedWorldContent/StoryTable_Initialization.lua` and
+`StoryClutter/`: boarded houses, corpses with loot, burnt houses, crashed cars and table settings, attached to
+rooms and roads at world generation. `RandomizedWorldBase` subclasses are offered candidate rooms by room type and
+zone; clutter goes through `StoryTables.addItemToClutterTable`, which validates ids and applies the sandbox
+blacklist. A new story *class* needs Java; loot-only stories are Lua tables. Stories only exist where the world
+is generated after the mod was added.
 
-### Metazones / the zone metagrid
-- `getWorld():getMetaGrid()` is the global zone registry that works on *unloaded* world - the same API the
-  CDDA note used for town-edge detection.
-- `server/metazones/metazoneHandler.lua` shows the moddable registration calls, driven by map-provided data:
-  `getWorld():registerAnimalZone(name,type,x,y,z,w,h,properties)`,
-  `registerMannequinZone(...)`, `registerRoomTone(...)`,
-  `getMetaGrid():registerGeometryZone(name,type,z,geometry,points,properties)` (polygon zones),
-  plus spawn-origin and **basement spawn location** handlers.
-- `AnimalsPathConfig.lua` and `BiomeMapConfig.lua` show zone-driven animal/biome data: animal habitats are
-  metazone regions with property maps - custom monsters can get natural habitats this way.
+### Zones (the metagrid)
+- `getWorld():getMetaGrid()` is the zone registry and works for unloaded areas. Registration calls used by
+  `server/metazones/metazoneHandler.lua` with map-provided data:
+  `getWorld():getMetaGrid():registerAnimalZone(name, type, x, y, z, w, h, properties)` (it's on `IsoMetaGrid`,
+  not `IsoWorld`), `registerGeometryZone(name, type, z, geometry, points, properties)` (polygons, also on
+  `IsoMetaGrid`), and `getWorld():registerMannequinZone(...)`, `registerRoomTone(...)`, `registerWaterZone`,
+  `registerWaterFlow`, `registerVehiclesZone`, `registerSpawnOrigin`.
+- `AnimalsPathConfig.lua` and `BiomeMapConfig.lua` show habitats as zones with property maps; a custom creature can
+  get natural habitats the same way.
 
-### Basements (new in B42)
-- `Basements.getAPIv1()` (Lua) exposes `registerBasementSpawnLocation(mapID, name, type, x, y, z, w, h,
-  properties)` - basement entry points are registered per map id.
-- `media/basement_access/*.pzby` = binary prefab building chunks (header `PZBY`, a tileset-name string table,
-  then per-tile records) used for basement exteriors/interiors/stair access pieces. Format is compact binary;
-  read it with a script if you need to inspect (strings are length-prefixed).
-- `zombie/basements/` (12 classes) is the runtime; `ProceduralBasements/` in shared Lua too.
+### Persistent world systems
+- **The pattern:** a server-side `SGlobalObjectSystem` (state, save and load, MP sync; Lua in
+  `server/Map/SGlobalObjectSystem.lua`, Java in `zombie.globalObjects`), a client twin `CGlobalObjectSystem`
+  (`client/Map/`), a context-menu entry and a timed action for the long verb. Rain barrels
+  (`client/RainBarrel/CRainBarrelSystem.lua`), farming (`client/Farming/CFarmingSystem.lua`) and generators are
+  built this way; the rain barrel is the smallest complete example to copy. Register both halves by the same name.
+- Other loops: fishing (`client/Fishing/`: manager, handler, states), traps (items, trap objects,
+  `AddExplosiveTrapPacket` in MP), fire (`IsoFireManager`). Prefer an `entity` with stock components when one
+  fits (data note).
 
-### WorldGen (B42's Lua world generator)
-- `server/WorldGen/` with `Biomes.lua`, `Features.lua`, `Roads.lua`, `Veins.lua`, `Selection.lua`,
-  `attachments/Priorities.lua`, `biomes/`, `features/`, `prefabs/` and a global `worldgen` table of
-  `{biomes,features,selection,prefabs,veins,roads,attachments,similar,priorities}`.
-- This is how wilderness/biome content is generated at world creation (or how TIS generates it) - the tables
-  are moddable: add biomes/features/prefabs like adding distributions. The metazone `BiomeMapConfig` feeds it.
-- Under-documented publicly; read `Features.lua`/`Biomes.lua` for the schema (it's self-describing Lua).
+### Tiles, objects and moveables
+- Every tile in a `.tiles` file has a property set; the install's readable `.tiles.txt` sidecars (such as
+  `newtiledefinitions.tiles.txt`) show which properties vanilla uses: `container = <type>` (makes the tile a loot
+  container of that type), `Door`, `doorN`/`doorW`, `WallN`/`WallW`, `solid`/`solidtrans`, `collideN`/`collideW`,
+  `floor`, `water`, `bed`, `sittable`, `Table`, `Material`/`MaterialType` (hit sounds and scrap), `CanScrap`,
+  `BlocksPlacement`, `Facing`, `FloorHeight`, `stair`, `tree`, `bush`. Unknown keys are ignored: copy names from
+  the sidecar.
+- Object classes on squares (`zombie.iso.objects`): `IsoDoor`, `IsoWindow`, `IsoCurtain`, `IsoBarricade`,
+  `IsoThumpable`, `IsoGenerator`, `IsoStove`, `IsoFireplace`, `IsoCompost`, `IsoMannequin`,
+  `IsoWorldInventoryObject` (items on the ground), `IsoLightSource`, `IsoJukebox`, `IsoDeadBody`, `IsoFire`,
+  `IsoTrap`, `IsoWaveSignal` (radios and TVs), `IsoCarBatteryCharger`. Place a plain object with
+  `IsoObject.new(cell, square, spriteName)` and `square:AddTileObject(obj)` (CDDA note).
+- **Moveables:** `shared/Moveables/ISMoveableDefinitions.lua` and `ISMoveableSpriteProps.lua` decide which sprites
+  can be picked up, with which tool and skill, the break chance and the resulting item; `ISMoveablesAction` is the
+  timed action. Custom carryable furniture = entries for your sprites plus the tile properties.
+- **Without TileZed:** `media/spriteModels.txt` puts a 3D `model` on a tile sprite (`tileset { name, tile { xy,
+  modelScript, translate, rotate, scale } }`); `media/seating.txt` gives furniture tiles seat anchors per direction.
+  A chair needs both the `sittable` property and a seating entry. Wall cutaways use the shared mask PNGs
+  (`wallcutaways.png`, `mask_transparency_*.png`).
 
-### Climate, seasons, erosion
-- `server/Climate/ClimateMain.lua` - the weather/climate driver; `getClimateManager()` (Java) exposes rain,
-  fog, thunder, temperature, wind; `client/erosion/` + `server/Seasons`/`erosion` drive visual season +
-  overgrowth on a `zombie/erosion` backend (ErosionManager). Erosion tiles come from
-  `media/tiledefinitions_erosion.tiles` - modded tiles can participate in erosion if they carry the right
-  properties.
-- `OnClimateTick`-family events exist for weather-driven mods; weather channels on the radio
-  (`server/radio/ISWeatherChannel.lua`) read the same manager.
+### Map mods and map files
+- `media/maps/<MapName>/` with `map.info` (`title`, `description`, `lots = Muldraugh, KY` to stitch the map onto
+  the world), `spawnpoints.lua`, `thumb.png`, and the binary cells. `mod.info` names the map with `map=` and its
+  tilesets with `tiledef=`/`pack=`.
+- A B42 town folder (`media/maps/Muldraugh, KY`) is a grid of `<x>_<y>.lotheader` and `chunkdata_<x>_<y>.bin` pairs,
+  one pair per 256x256 cell, plus `WorldGenOverride.lua` (worldgen settings for the wilderness around that town),
+  `basements.lua` and `objects.lua`. Missing either half of a pair corrupts the cell.
+- Map mods replace whole cells; there are no partial-cell edits, and two mods replacing the same cell can't both
+  win. Build maps with the community TileZed/WorldEd forks (B42 builds of the official tools weren't out at
+  research time); `IsoChunk`, `IsoChunkLevel`, `ChunkSaveWorker` and `LotHeader` read the binaries.
+- **The in-game map:** `client/ISUI/Maps/` (`ISWorldMap`, `ISMiniMap`, `ISMapSymbols`, a world-map `Editor/`);
+  `MapSymbolDefinitions.getInstance():addTexture(name, texturePath, category)` registers stamps (categories
+  Symbols, Loot, Locations; register at `OnGameBoot`). `zombie.worldMap` stores symbols on map items.
+- **Annotated-map stashes:** `shared/StashDescriptions/*StashDesc.lua` with `StashUtil.lua`. In the vanilla shape
+  (values made up):
+```lua
+local s = StashUtil.newStash("MyModStash1", "Map", "Base.MuldraughMap", "Stash_AnnotedMap")
+s.spawnOnlyOnZed = true
+s.buildingX, s.buildingY = 10000, 9000           -- the target building, in world coordinates
+s.spawnTable = "MyModCache"                      -- the loot table for the placed container
+s:addContainer("GunBox", "mymod_tiles_01_0", nil, "livingroom")
+s:addStamp("X", nil, 9998, 8999, 1, 0, 0)        -- a symbol (or nil and a text key)
+```
+  A stash can also spawn zombies, traps and barricades at the target. `StashDebug.lua` shows them in `-debug`.
 
-### Meta events / the AI Director
-- `server/NPCs/SadisticAIDirector/SadisticMusicDirector.lua` - named "Sadistic" after its predecessor
-  (`SadisticAIDirector` governs offscreen drama: nearby screams, gunshots, the helicopter event, house alarms
-  that pull hordes). The music half is client-side and reads
-  `playerObj:getStats():getNumVisibleZombies()/getNumChasingZombies()` to pick track intensity - so those two
-  stat fields exist for your own "danger meter".
-- Meta events live in `zombie/randomizedWorld` + the AI director package; they're world-level, fire through
-  `OnWorldSound`/`WorldSoundManager` for the audible parts, and helicopter-style events are scheduled by game
-  time + sandbox settings (`MetaEvent` sandbox options). Custom meta events = a server Lua loop that schedules
-  world sounds + spawns, using the same primitives.
-
-### Admin/server commands
-- `zombie/commands/` (79 classes) implements `/additem`, `/godmod`, `/createhorde`, etc. Custom slash commands
-  come free via `Events.OnClientCommand` handled server-side + chat parsing - or for dedicated servers, the
-  RCON/command channel. `client/ServerCommands.lua` lists vanilla client->server verbs.
+### Worldgen and basements
+- `server/WorldGen/` (`Biomes.lua`, `Features.lua`, `Roads.lua`, `Veins.lua`, `Selection.lua`, `biomes/`,
+  `features/`, `prefabs/`) fills a global `worldgen` table that `zombie.iso.worldgen` consumes (`WorldGenReader`,
+  `WorldGenParams`, `WorldGenChunk`, `WorldGenSimplexGenerator`, `PrefabStructure`, `StaticModule`, and
+  sub-packages `biomes`, `roads`, `rules`, `veins`, `zones`, `blending`, `attachments`). Vanilla wilderness is
+  generated around the authored cells; a map mod can ship its own `WorldGenOverride.lua`. The table schema is
+  only documented by the Lua files themselves.
+- Basements: `Basements.getAPIv1()` (Lua) has `registerBasementSpawnLocation(mapID, name, type, x, y, z, w, h,
+  properties)`. Prefab pieces are `media/basement_access/*.pzby`, a binary format (header `PZBY`, a tileset-name
+  string table, then tile records); the runtime is `zombie.basements`.
+- Seasons and overgrowth: `zombie.erosion` (`ErosionMain`) with `client/erosion/`; erosion tiles come from
+  `media/tiledefinitions_erosion.tiles`, so a modded tile only takes part if it carries the matching properties.
 
 ## Build steps
-1. Loot mod: `server/` Lua, append to `ProceduralDistributions.list` + `SuburbsDistributions`; validate every
-   id with `ScriptManager.instance:FindItem`.
-2. Story mod: study a small `zombie/randomizedWorld` class via decompile for the base class contract, or use
-   `StoryClutter`-style Lua tables if your story is loot-only.
-3. Zone-driven feature: register zones through `getWorld()`/`getMetaGrid()` from `server` at `OnInitWorld`/
-   map-data load; query anywhere with `getZonesAt` (unloaded-friendly).
-4. WorldGen content: extend `worldgen.features`/`biomes` tables in a `server` file (runs before world build).
-5. Meta event: server-side scheduler + `addWorldSound`/spawn calls + sandbox option to tune frequency.
+1. Loot: append to the lists from a shared or server Lua file before containers are generated (the B41 note
+   edits and removes entries in `Events.OnPreDistributionMerge`), and validate every id with
+   `ScriptManager.instance:FindItem`. Forageables: an item definition in a shared file.
+2. A persistent device: copy the rain-barrel `SGlobalObjectSystem`/`CGlobalObjectSystem` pair.
+3. An interactive tile: the property set in your `.tiles`, a `seating.txt` or `spriteModels.txt` entry where needed,
+   moveable definitions to make it carryable.
+4. A map: TileZed/WorldEd cells into `media/maps/<name>/`, `map.info` with `lots =`, `spawnpoints.lua`, and
+   `map=` in `mod.info`.
+5. A treasure map: `StashUtil.newStash` in a shared file, symbol textures through `MapSymbolDefinitions`.
+6. Zones: register on the server at world init; query anywhere with `getZonesAt`.
 
 ## Verification
-- Loot: `-debug` loot-window / item viewer shows procedural tables; `console.txt` prints the
-  "item script does not exists" warnings for bad ids at world load.
-- Zones: `-debug` iso-region/metazone visualizers draw registered zones.
-- WorldGen/stories: generate a new world with only your mod; check `console.txt` story/gen logs.
-- Basements API: `javap`/decompile `zombie.basements` for the full v1 surface (only the registration call was
-  verified here from metazoneHandler).
-- Not verified: custom `worldgen.prefabs` end-to-end; radio channel authoring beyond data schema; dedicated
-  server for any of it.
+- Survey only. Read on 42.21.0: the Lua and data files cited (distributions, foraging, story tables,
+  `metazoneHandler.lua`, the global-object systems, moveables, stash files, `spriteModels.txt`, `seating.txt`,
+  the Muldraugh map folder, `server/WorldGen/`), plus javap listings of the packages named. At review time the
+  Java names were checked against the unofficial 42.21.0 javadocs (albion.codeberg.page/PZ-JavaDocs).
+- Not verified: anything in game, custom worldgen prefabs, the full `Basements` API, hand-written map binaries,
+  exporting annotations from the map editor, a dedicated server.
 
 ## Gotchas
-1. **Loot entry typo = silent missing item.** `FindItem` returns null; vanilla only prints. Validate your ids
-   at boot and `print` failures yourself.
-2. **Procedural table edits must run before containers fill.** Rooms are looted when first loaded - patch
-   tables in `OnInitWorld`/shared init, not on demand.
-3. **Zone queries on unloaded squares** return nil for `getCell():getGridSquare` but `getMetaGrid():getZonesAt`
-   still works - plan around it (CDDA gotcha, same API).
-4. **World stories only exist at world creation.** A story mod can't retrofit into an old save's already-
-   generated chunks; new cells only.
-5. **`getNumVisibleZombies` is client-only truth** - on a dedicated server read population via the server
-   zombie lists instead.
-6. **Erosion ignores mod tiles without the right tiledef properties** - copy erosion-capable property sets
-   from `tiledefinitions_erosion.tiles`.
-7. **Basement registration needs the mapID of an installed map** - registering for `Muldraugh, KY` affects the
-   vanilla map; wrong mapID silently does nothing.
-8. **SadisticAIDirector is SP-shaped.** On dedicated servers the drama logic mostly doesn't run; replicate
-   with your own scheduler if MP needs it.
-9. **`.pzby` is binary, not text** - don't hand-edit; if you need custom basement pieces, build the structure
-   in game and study how the format stores tile ids (or wait for tooling).
-10. **StoryTables clutter runs through the sandbox blacklist** - `RemoveStoryLoot=true` can strip your story's
-    custom items unless `ItemPickerJava.getLootModifier` marks them exempt (modifier != 0).
+1. **A loot entry never spawns.** Cause: a typo in the item id; vanilla only logs it. Fix: check ids with
+   `FindItem` at boot and print the failures yourself.
+2. **Foraged items far too common.** Cause: a zone value read as a percent; it's a roll count. Fix: compare with
+   vanilla values.
+3. **A story mod doesn't appear in an old save.** Cause: stories are placed when the world is generated. Fix: test
+   in a new world or unexplored areas.
+4. **Story items disappear with `RemoveStoryLoot`.** Cause: clutter goes through the sandbox blacklist. Fix: check
+   `ItemPickerJava.getLootModifier` for your items.
+5. **`registerAnimalZone` "doesn't exist" on `getWorld()`.** Cause: it's an `IsoMetaGrid` method. Fix:
+   `getWorld():getMetaGrid():registerAnimalZone(...)`.
+6. **A global-object device works in single player only.** Cause: only one half (server or client system) was
+   registered. Fix: register both, paired by name.
+7. **A stove that isn't a container, a chair you can't sit on.** Cause: a misspelled property (ignored silently),
+   or a missing `seating.txt` anchor. Fix: copy property names from the sidecar; add both halves for seats.
+8. **Picked-up custom furniture breaks.** Cause: the moveable `breakChance` rolls on pickup. Fix: set it (and the
+   skill gate) deliberately.
+9. **A map mod stands alone instead of joining Knox Country.** Cause: no `lots = ...` in `map.info`. Fix: add it.
+10. **Two map mods fight over a cell.** Cause: cells are replaced whole. Fix: list the cells you replace in the
+    mod description.
+11. **The X lands on the neighbour's house.** Cause: stash stamps use world coordinates. Fix: read the coordinates
+    in `-debug`; give `addContainer` a room name that exists in the target building.
+12. **Map stamps don't show.** Cause: `addTexture` ran after the map UI was built. Fix: register at `OnGameBoot`.
+13. **A basement registration does nothing.** Cause: the map id isn't an installed map. Fix: use the exact map id.
+14. **Modded tiles don't erode.** Cause: missing erosion properties. Fix: copy them from
+    `tiledefinitions_erosion.tiles`.
 
 ## Assets
-n/a - simulation-layer note.
+- Map symbols: small PNGs in `media/ui/LootableMaps/`. Tile sheets and definitions: TileZed, or the hand-written
+  `.pack`/`.tiles` formats in the CDDA note.
+
+## Cost and time
+Part of one research session on 2026-10-12.
 
 ## Open questions
-- Full `worldgen` schema (features/prefabs/veins semantics) - only the table skeleton is mapped here; the
-  `biomes/`, `features/`, `prefabs/` subfolders have the real definitions.
-- The complete `Basements` v1 API surface.
-- Whether mods can register entirely new randomized world story *classes* in Lua (needs a
-  `RandomizedWorldBase` subclass - probably Java-only; the Lua clutter tables are the reachable half).
-- `.pzby` field-by-field layout (header + tileset table + tile records confirmed; record layout not decoded).
+- The full `worldgen` schema (features, prefabs, veins, blending) and how it maps to `WorldGenParams`.
+- The complete `Basements` v1 API and the `.pzby` record layout; the byte layout of `.lotheader` and
+  `chunkdata_*.bin`.
+- Whether Lua can register new room types for loot, or only map data can.
+- What drives the meta events (helicopter, alarms) in B42, and whether they run on dedicated servers.

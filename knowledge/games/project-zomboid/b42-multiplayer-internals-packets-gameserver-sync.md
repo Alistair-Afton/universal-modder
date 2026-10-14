@@ -1,14 +1,14 @@
 ---
 kind: game
-title: 'Multiplayer internals: the 296-class packet layer, GameClient/GameServer, ownership, co-op hosting and MP-safe mod patterns'
+title: 'Build 42 multiplayer for modders: commands, transmit and sync verbs, ownership, server anti-cheat, the packet layer and the population manager'
 game: Project Zomboid
 games_also: []
-game_version: 'Build 42.21.0 (Steam, Windows 10); javap/jar-verified'
+game_version: 'Build 42.21.0 (Steam, Windows 10). A survey: javap listings of zombie.network and zombie.popman, the install''s Lua and other mods'' files; no server was run for this note'
 platform: windows
 engine: java
 route: loader-api
-tools: ["javap (JDK)", "zombie.network.* (296 packet classes)", "ServerCommands.lua", "dedicated server (Steam app 380870)"]
-anti_cheat: 'none'
+tools: ["javap (JDK)", "zombie.network / zombie.popman packages", "vanilla ServerCommands.lua", "dedicated server (Steam app 380870)"]
+anti_cheat: 'B42 dedicated servers run server-side checks (zombie.network.anticheats, switched by the ServerOptions antiCheat* settings); this note is about servers you host, and a mod that changes state on a client can trip them'
 status: in-progress
 agents:
 - Devin (SWE-2 Medium)
@@ -16,136 +16,131 @@ humans: [Alistair-Afton]
 date: '2026-10-12'
 links:
 - "https://pzwiki.net/wiki/Networking"
-tags: [b42, multiplayer, server, packets, sync, ownership, dedicated-server, co-op, networking, luanet]
+- "https://albion.codeberg.page/PZ-JavaDocs/"
+tags: [b42, multiplayer, server, dedicated-server, co-op, networking, commands, sync, ownership, moddata, anti-cheat, packets, popman]
 ---
-# Multiplayer internals: packets, GameServer, ownership and MP-safe mod patterns (42.21.0)
+# Build 42 multiplayer for modders: commands, sync verbs, ownership, anti-cheat and the packet layer
 
-> Since 42.13 the server is authoritative; every "it works solo but not MP" bug is a sync-model bug.
-> This note maps the real `zombie.network` layer - 296 packet classes, `GameClient`/`GameServer`,
-> `CoopMaster`/`CoopSlave`, `FakeClientManager` - and gives the rules and recipes that make custom
-> creatures/systems survive a dedicated server.
+> Since 42.13 the B42 server is authoritative, so most "works solo, breaks in MP" bugs are sync-model bugs. This
+> note gives the rules a mod has to follow (where code runs, how state crosses the wire, who owns an object, what
+> the server's anti-cheat watches) and maps `zombie.network` and `zombie.popman` behind them. It's a survey of
+> javap listings, the install's Lua and other mods' files; no server was run for it. Single-player basics are in
+> the [orientation note](b42-modding-orientation-layout-lua-runtime-tooling-interop-ui.md); a modded B41
+> dedicated server (`Mods=`, `WorkshopItems=`, `Map=`, checksums) is in the
+> [B41 note](b41-modpack-fix-mods-and-linux-dedicated-server.md).
 
 ## Setup
-- javap-verified 42.21.0. Builds on `b42-lua-runtime-...md` (command model) and the cheat-sheet note
-  (transmit*/sync* verbs).
+- Project Zomboid **42.21.0**, Steam, Windows 10; the dedicated server is Steam app 380870. Multiplayer returned to
+  B42 in 42.13 (December 2025).
+- Vanilla references: `media/lua/client/ServerCommands.lua` and the server-side command tables, plus Cry of Fear
+  Monsters' network split (creatures note).
 
 ## Route and why
-Loader API - the MP layer is Java-internal but Lua-reachable through the documented verbs.
+Loader API. The network layer is Java, but mods reach it through Lua commands and the engine's `transmit*`/`sync*`
+verbs; mods can't add packet types.
 
-## The network layer map (`zombie.network`, jar-verified)
-- **`GameServer` (143 KB) / `GameClient` (97 KB)** - the two endpoints; almost all MP verbs route through
-  them. `ServerOptions`/`ServerSettings`, `SteamWorkshopItems`/`GameServerWorkshopItems` (workshop sync),
-  `DevGameServer`.
-- **`zombie.network.packets` - 296 `.class` files** (the 42.21 javadocs list 272 public types, 112 in
-  the top package - the rest are inner classes), one per action: `AddExplosiveTrapPacket`,
-  `AddItemToMapPacket`, `AddObjectToMapPacket`, `AddInventoryItemToContainerPacket`,
-  `AddItemInInventoryPacket`, `AddBrokenGlassPacket`, `AddTrackPacket`, `AddXPMultiplierPacket`,
-  `AddUserlogPacket`, `AddTicketPacket`, `AddWarningPointPacket`, `BanUnbanUserActionPacket`... the packet
-  name IS the feature. New vanilla actions = new packets; your mod doesn't create packets - it rides the
-  command layer or reuses the right packet by using the right API call.
-- **Co-op hosting**: `CoopMaster`/`CoopSlave`, `CoopUserName`, `ICoopServerMessageListener` - "host from
-  the client" spins an in-process server. `ConnectionManager`, `ClientChunkRequest`, `ChunkChecksum`,
-  `ClientServerMap` (chunk sync + integrity), `ConnectionDetails`, `IConnection`.
-- **`FakeClientManager`** - fake clients for server-side testing/bots (javap-verified to exist).
-- **`BodyDamageSync` + `BodyDamageUpdatePacket`** - the damage-sync pipeline (`IsoPlayer:
-  startReceivingBodyDamageUpdates` from the cheat sheet is the client entry).
-- **Admin/moderation**: `BanSystem`, `DBTicket`/`DBBannedIP`/`DBBannedSteamID`, `DBResult`,
-  `DiscordBot`/`DiscordSender` (server→Discord exists!), `Account`, `DesktopBrowser`.
+## How the game works (what we had to learn)
 
-## The sync model - the rules that decide if your mod works on a server
-1. **Server owns the world.** State mutations happen on `server/` Lua (or admin-side); presentation lives
-   on `client/`. A client that mutates world state changes nothing for other players.
-2. **Commands are the mod-level wire**: `sendServerCommand(module, command, args)` (server→client,
-   on `GameServer`), `sendClientCommand(module, command, args)` (client→server, on `GameClient`) +
-   `Events.OnClientCommand` (fires server-side)/`OnServerCommand` (client-side). This is the packet
-   interface mods get - see `ServerCommands.lua` for the vanilla pattern.
-3. **`transmit*`/`sync*` verbs are the engine-level wire** for stock object changes:
-   `sq:transmitAddObjectToSquare`/`transmitRemoveItemFromSquare`/`transmitModdata`,
-   `obj:sync`/`syncIsoObject(Send|Receive)`/`syncFluidContainer*`, `transmitPlayerVoiceSound`,
-   `transmitWeather`. Mutate on the server WITH these, not with the silent setters.
-4. **Ownership**: `getOwnerPlayer`/`isRemoteZombie`/`getOnlineID`/`getOwner` decide who drives an
-   object - remote zombies/players are read-only views; drive them through the owner or the server.
-   (`IsoZombie` remote methods verified in the cheat sheet.)
-5. **ModData is sync-capable but not auto**: item/object `getModData` persists; pushing changes to
-   clients needs `transmitModdata` (squares) or your own command broadcast.
-6. **Chunk scoping**: clients only know loaded chunks (`ClientChunkRequest`/`ChunkChecksum` verify them);
-   global state belongs in metazones/`SGlobalObjectSystem`, not square caches.
+### Where code runs
+- `shared/` runs everywhere; `client/` on single player and MP clients; `server/` on single player and the server.
+  A dedicated server never runs `client/` (no UI, no renderer), and an MP client never runs `server/`.
+- Change world state on the server (`server/` files, or shared code behind `isServer()`); keep presentation (UI,
+  sounds, particles, animation variables a client reads locally) on clients.
 
-## Creature mods on a server - the checklist
-- Spawn on `server/` (the `createRealZombieNow`/`addAnimal` calls), never client - duplicates otherwise.
-- Brains on `server/` where they mutate (damage, aggro, spawns); client-side brains for presentation only
-  (sounds, particles, anim variables the animset reads locally).
-- Identity must survive sync: persistent outfit ID (zombies) / save-load (animals); a client-only identity
-  table drifts across chunk unload (the COF recycling saga was exactly this).
-- Sounds that attract zombies: `WorldSoundManager:addSound` on the server.
-- Remote presentation: the COF `COF_RemotePresentation` pattern - server broadcasts "this zombie is
-  monster X", clients set the `Is*` variables + visuals. Don't try to push Lua state per-tick; push
-  identity once and let each client present locally.
+### Commands: the mod-level wire
+- **Client to server:** `sendClientCommand(module, command, args)` (Lua global; Java `GameClient`). The server
+  receives it with `Events.OnClientCommand.Add(function(module, command, player, args) ... end)`.
+- **Server to client:** `sendServerCommand(module, command, args)` to everyone or
+  `sendServerCommand(player, module, command, args)` to one player (Java `GameServer`). Clients receive it on
+  `Events.OnServerCommand`.
+- `args` must be plain data (numbers, strings, booleans, nested plain tables). Send `getOnlineID()` or coordinates
+  and look objects up again on the other side.
+- **Global mod data:** `ModData.transmit(key)` sends a table, `ModData.request(key)` asks the server for it, and
+  `Events.OnReceiveGlobalModData` receives it (the table can be `false` in a reply to a request). Keep authoritative
+  data on the server; a client's copy isn't kept across reconnects.
 
-## Dedicated server realities
-- Separate Steam app (380870); mods load from `servertest.ini` `Mods=`/`WorkshopItems=` lists, synced to
-  clients via `GameServerWorkshopItems`. Client-only Lua never runs there - `client/` files are dead code
-  on a dedi; `shared/`+`server/` are what matter.
-- The existing KB note `b41-dedicated-server-...` covers B41; B42 differences: server-authoritative
-  everything (41 let clients mutate more), animal/entity systems server-side, workshop item sync
-  (`SteamWorkshopItems` class exists).
-- `FakeClientManager` = bots/fake clients on the server for load testing - exists; Lua reachability
-  unverified.
-- `DiscordBot`/`DiscordSender` are in the jar - server→Discord announcements are a vanilla feature mods
-  can piggyback (config surface unverified).
+### Transmit and sync verbs: the engine-level wire
+- Squares: `sq:transmitAddObjectToSquare(obj)`, `sq:transmitRemoveItemFromSquare(obj)`, `sq:transmitModdata()`.
+- Objects: `obj:transmitModData()` (capital D on `IsoObject`), `obj:sync()`, `syncIsoObject`, the fluid-container
+  sync. Also `transmitPlayerVoiceSound`, and `getWorld():transmitWeather()` after a server-side weather change.
+- A plain setter on the server changes the server's world silently; clients don't see it. Damage applied on the
+  server should be followed by a `sendServerCommand` for the presentation (the Cry of Fear pattern).
 
-## Testing MP without two PCs
-- Host co-op from the game client (`CoopMaster`) + a second local client on the same machine (second
-  Steam instance or the dedicated server binary); `console.txt` on each shows both sides.
-- `-debug` + the debug network menus; admin commands via `zombie/commands` (`ServerCommands.lua`).
-- `ChunkChecksum` catches client-server map divergence - a mod that writes different state on each side
-  triggers checksum failures/kicks; that's your canary for sync bugs.
+### Ownership and remote objects
+- `isRemoteZombie()`, `getOwnerPlayer()`, `getOwner()` and `getOnlineID()` say who drives a zombie. A remote zombie
+  is a view of another client's simulation: changing it locally ghosts the state. Bandits only lets the owning
+  client steer (`BanditUtils.IsController`).
+- `zombie.popman` is the population layer behind this: `ZombiePopulationManager`, `NetworkZombieManager`,
+  `NetworkZombieSimulator`, `NetworkZombiePacker`, `ZombieCountOptimiser`, `Ownership`, `LoadedAreas`, and
+  `popman.animal.AnimalController`. It's Java-internal; mods reach it through `VirtualZombieManager` and the
+  population sandbox settings. A zombie you see may be simulated by another client, so identity must live on the
+  object itself (a persistent outfit), never in a client-side table.
 
-## Gotchas
-1. **`server/` files don't exist on clients and `client/` files don't exist on dedi** - put shared tables
-   in `shared/` or you'll get "module not found" only on servers.
-2. **`sendServerCommand` args must be table-serializable** - no functions/userdata; keep args flat
-   primitives or nested plain tables.
-3. **Remote objects are views** - `isRemoteZombie()` true means "another client owns this"; mutating it
-   locally ghosts the state.
-4. **Packets aren't moddable** - you can't subclass `IZomboidPacket` from Lua; new wire messages = the
-   command layer.
-5. **`transmitModdata` is square-scoped** - object-level ModData needs `obj:sync` or manual commands.
-6. **B42 does have server anti-cheat** - `zombie.network.anticheats` ships ~20 check classes
-   (`AntiCheatSpeed`, `AntiCheatNoClip`, `AntiCheatHitDamage`, `AntiCheatXPUpdate`...) gated by
-   `ServerOptions.antiCheat*` switches; a mod mutating state client-side can trip them, and
-   `ChunkChecksum` divergence + `AddWarningPointPacket` exist - sloppy client-side mutation reads as
-   cheating.
-7. **`client/` Lua on dedi is dead code, not an error** - silent no-ops are the worst MP bug source;
-   log once from `shared/` with `isServer()`/`isClient()` so you know where each file ran.
-8. **Dedi has no renderer** - any code touching `getRenderer`/UI must be `client/`-gated or it NPEs the
-   server.
+### Server anti-cheat
+`zombie.network.anticheats` has about 20 check classes (`AntiCheatSpeed`, `AntiCheatNoClip`,
+`AntiCheatHitDamage`, `AntiCheatHitLongDistance`, `AntiCheatXPUpdate`, `AntiCheatSafeHouseMember`, ...) plus
+`PacketValidator` and `SuspiciousActivity`, and `ServerOptions` has matching switches (`antiCheatSpeed`,
+`antiCheatNoClip`, `antiCheatHit`, `antiCheatXp`, `antiCheatChecksum`, `antiCheatSafeHouse`, ...). A mod that
+moves players, deals damage or grants XP on a client instead of the server can trip them. `ChunkChecksum`
+compares client and server chunks, and `AddWarningPointPacket` exists: client-side world edits look like cheating.
+
+### The packet layer (`zombie.network`)
+- `GameServer` and `GameClient` are the two endpoints; `ServerOptions`/`ServerSettings`;
+  `GameServerWorkshopItems` syncs Workshop items to clients.
+- `zombie.network.packets` has one class per action (272 public types in the 42.21 javadocs, 112 in the top
+  package; the jar holds 296 `.class` files counting inner classes): `AddItemToMapPacket`,
+  `AddExplosiveTrapPacket`, `AddXPMultiplierPacket`, `BodyDamageUpdatePacket`, `AddWarningPointPacket` ... A mod
+  doesn't create packets; it calls the API whose packet already exists, or uses commands.
+- Hosting from the game client runs an in-process server (`CoopMaster`/`CoopSlave`). Chunk sync and integrity:
+  `ClientChunkRequest`, `ChunkChecksum`, `ClientServerMap`. Other classes in the package: `FakeClientManager`
+  (fake clients for load tests), `BodyDamageSync`, `BanSystem`, and `DiscordBot`/`DiscordSender` (server messages to
+  Discord); none of these were tried.
+
+## Build steps
+1. Spawn creatures and change the world only on the server (`createRealZombieNow`, `addAnimal`, object adds); never
+   on a client, or you get duplicates or phantoms.
+2. Brains that change damage, aggro or spawns run on the server; clients present (sounds, particles, the animation
+   variables their AnimSets read).
+3. Identity crosses the wire once: the server says "this zombie is monster X", each client sets its variables and
+   visuals locally (Cry of Fear's remote presentation). Don't push Lua state every tick.
+4. Use commands for your own messages and the `transmit*`/`sync*` verbs for stock object changes.
+5. Test with co-op hosting from the client plus a second client, or the dedicated server on the same machine; read
+   `console.txt` on each side.
 
 ## Verification
-- javap/jar-verified 42.21.0: the classes above exist; packet count = 296 `.class` files under
-  `zombie/network/packets`.
-- Verified in the wild: server-authoritative model (42.13+), COF's presentation-sync pattern, command
-  layer used by vanilla `ServerCommands.lua`.
-- Not verified in-game: `FakeClientManager` Lua reachability, `DiscordBot` config surface, dedi workshop
-  sync edge cases (no dedi instance was launched in this research).
+- Survey only. Class names from javap listings of 42.21.0, checked at review time against the unofficial 42.21.0
+  javadocs (public types only); the command directions and Lua signatures from `LuaManager.GlobalObject`,
+  `GameClient` and `GameServer` there. The patterns from reading Cry of Fear Monsters and Bandits.
+- Not verified: anything on a running server, `FakeClientManager` or `DiscordBot` use from a mod, Workshop sync
+  edge cases, B42 dedicated-server start flags.
 
-## `zombie.popman` - resolved (was an open question)
-The population manager IS the MP/virtualization layer: `ZombiePopulationManager` (29 KB) owns the world
-population; `NetworkZombieManager`/`NetworkZombieSimulator`/`NetworkZombiePacker`/`NetworkZombieList`
-simulate remote/offloaded zombies and pack per-zombie updates; `ZombieCountOptimiser` enforces budgets;
-`ZombiePopulationRenderer` is the debug visualizer (pairs with the population debug window);
-`Ownership`, `PlayerSpawns`, `ObjectPool`/`PoolCaps` (the recycle pool behind `isReused`), `LoadedAreas`,
-`ZombieStateFlags`, `popman.animal.AnimalController`, `DebugCommands`, `MPDebugInfo`. Mod-facing: it's
-Java-internal - you reach it through `VirtualZombieManager` (spawn/kill/horde calls) and the population
-sandbox settings, not directly. In MP, "your" zombie may be a *simulated* one owned by another client -
-another reason identity must live on the real object (persistent outfit), never a client-side table.
+## Gotchas
+1. **"Module not found" only on a server.** Cause: a table the server needs lives in `client/` (or the reverse).
+   Fix: shared tables in `shared/`.
+2. **A spawn works in single player and does nothing (or duplicates) in MP.** Cause: client-side spawning. Fix:
+   spawn on the server.
+3. **A command's arguments arrive empty.** Cause: Java objects, functions or userdata in `args`. Fix: plain data.
+4. **A remote zombie ignores your changes or flickers.** Cause: `isRemoteZombie()` is true; another client owns it.
+   Fix: change it through the owner or the server.
+5. **Square ModData syncs but object ModData doesn't.** Cause: `IsoGridSquare.transmitModdata` covers the square.
+   Fix: `IsoObject.transmitModData()`, `obj:sync()` or your own command.
+6. **Players get flagged or kicked after a mod action.** Cause: B42's server anti-cheat (`zombie.network.anticheats`,
+   `ServerOptions` `antiCheat*`) saw a client-side move, hit or XP change, or chunks diverged. Fix: do it on the
+   server.
+7. **Client code silently does nothing on a dedicated server.** Cause: `client/` isn't loaded there. Fix: log once
+   from `shared/` with `isServer()`/`isClient()` so you know where each file ran.
+8. **The server errors in UI or render code.** Cause: a dedicated server has no renderer. Fix: keep that code in
+   `client/`.
+9. **Weather or thunder differs between players.** Cause: changed on one side. Fix: change it on the server and
+   `transmitWeather()`; thunder events are written by the server and read by clients.
+
+## Assets
+None.
+
+## Cost and time
+Part of one research session on 2026-10-12.
 
 ## Open questions
-- Full `LuaNetManager`/command-layer internals (names exist in vanilla Lua; the Java side is `GameClient`
-  internals).
-- Whether mods can register custom `IZomboidPacket`s via any supported route (almost certainly not from
-  Lua - confirm via decompile if ever needed).
-- B42 dedi startup flags for headless testing (the B41 note covers B41; B42 dedi differences not yet
-  enumerated).
-- `popman.animal.AnimalController` semantics - animals virtualized like zombies? (class exists; behaviour
-  unverified).
+- Whether anything lets a mod register its own packet type (almost certainly not from Lua).
+- B42 dedicated-server start flags for headless testing, and how B42 Workshop sync differs from the B41 note.
+- Whether animals are virtualised like zombies (`popman.animal.AnimalController`).
